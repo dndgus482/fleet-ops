@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bqua.fleetops.job.adapter.outbound.JobExecutionMapper">
+
+    <resultMap id="jobExecutionResultMap" type="com.bqua.fleetops.job.inbound.dto.JobExecutionRes">
+        <id property="jobId" column="job_id"/>
+        <id property="jobExecutionNo" column="job_execution_no"/>
+        <result property="jobName" column="job_name"/>
+        <result property="jobHistoryNo" column="job_history_no"/>
+        <result property="jobExecutionStatus" column="job_status"/>
+        <result property="executionUserId" column="execution_user_id"/>
+        <result property="executionDateTime" column="execution_date_time"/>
+        <result property="startDateTime" column="start_date_time"/>
+        <result property="endDateTime" column="end_date_time"/>
+
+        <collection property="targetAgents" ofType="com.bqua.fleetops.job.inbound.dto.JobExecutionTargetAgentRes">
+            <result property="ip" column="ip"/>
+            <result property="userName" column="user_name"/>
+            <result property="startDateTime" column="agent_start_date_time"/>
+            <result property="endDateTime" column="agent_end_date_time"/>
+            <result property="log" column="log"/>
+        </collection>
+    </resultMap>
+
+    <select id="search" resultMap="jobExecutionResultMap">
+        SELECT
+            je.job_id,
+            je.job_execution_no,
+            j.job_name,
+            je.job_history_no,
+            je.job_status,
+            je.execution_user_id,
+            je.execution_date_time,
+            je.start_date_time,
+            je.end_date_time,
+            jeta.ip,
+            jeta.user_name,
+            jeta.start_date_time AS agent_start_date_time,
+            jeta.end_date_time AS agent_end_date_time,
+            jeta.log
+        FROM job_executions je
+            LEFT JOIN jobs j ON je.job_id = j.job_id
+            LEFT JOIN job_executions_target_agents jeta ON je.job_execution_id = jeta.job_execution_id
+        <include refid="jobExecutionSearchWhere"/>
+        ORDER BY
+        <choose>
+            <when test="spec.sort.sortField == 'executionDateTime'">
+                je.execution_date_time ${spec.sort.sortDirection}
+            </when>
+            <when test="spec.sort.sortField == 'jobExecutionNo'">
+                je.job_execution_no ${spec.sort.sortDirection}
+            </when>
+        </choose>
+        <include refid="com.bqua.fleetops.infrastructure.mybatis.pageClause"/>
+    </select>
+
+    <select id="searchCount" resultType="long">
+        SELECT
+            COUNT(DISTINCT je.job_execution_id)
+        FROM job_executions je
+            LEFT JOIN jobs j ON je.job_id = j.job_id
+            LEFT JOIN job_executions_target_agents jeta ON je.job_execution_id = jeta.job_execution_id
+        <include refid="jobExecutionSearchWhere"/>
+    </select>
+
+    <select id="findByJobId" resultMap="jobExecutionResultMap">
+        SELECT
+            je.job_id,
+            je.job_execution_no,
+            j.job_name,
+            je.job_history_no,
+            je.job_status,
+            je.execution_user_id,
+            je.execution_date_time,
+            je.start_date_time,
+            je.end_date_time,
+            jeta.ip,
+            jeta.user_name,
+            jeta.start_date_time AS agent_start_date_time,
+            jeta.end_date_time AS agent_end_date_time,
+            jeta.log
+        FROM job_executions je
+                 LEFT JOIN jobs j ON je.job_id = j.job_id
+                 LEFT JOIN job_executions_target_agents jeta ON je.job_execution_id = jeta.job_execution_id
+        WHERE je.job_id = #{jobId} AND je.job_execution_no = #{jobExecutionNo}
+    </select>
+
+
+    <sql id="jobExecutionSearchWhere">
+        <where>
+            <if test="!@org.springframework.util.StringUtils@isEmpty(spec.jobId)">
+                AND je.job_id = #{spec.jobId}
+            </if>
+            <if test="!@org.springframework.util.StringUtils@isEmpty(spec.agentGroupId)">
+                AND jeta.agent_group_id = #{spec.agentGroupId}
+            </if>
+            <if test="!@org.springframework.util.StringUtils@isEmpty(spec.ip)">
+                AND jeta.ip = #{spec.ip}
+            </if>
+        </where>
+    </sql>
+</mapper>
