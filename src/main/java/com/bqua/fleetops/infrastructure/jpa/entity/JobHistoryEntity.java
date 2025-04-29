@@ -26,7 +26,7 @@ public class JobHistoryEntity {
     @Column(name = "job_history_no", nullable = false, updatable = false)
     private Long jobHistoryNo;
 
-    @Column(name = "job_name", length = 100, nullable = false, updatable = false)
+    @Column(name = "job_name", nullable = false, updatable = false)
     private String jobName;
 
     @Column(name = "job_type", nullable = false, updatable = false)
@@ -37,7 +37,7 @@ public class JobHistoryEntity {
     @Column(name = "history", columnDefinition = "TEXT", updatable = false)
     private Map<String, Object> history;
 
-    @Column(name = "reg_user_id", length = 100, updatable = false)
+    @Column(name = "reg_user_id", updatable = false)
     private String regUserId;
 
     @CreationTimestamp

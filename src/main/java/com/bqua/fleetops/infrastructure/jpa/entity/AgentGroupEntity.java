@@ -16,10 +16,10 @@ import java.util.List;
 public class AgentGroupEntity {
 
     @Id
-    @Column(name = "agent_group_id", length = 200, nullable = false)
+    @Column(name = "agent_group_id", nullable = false)
     private String agentGroupId;
 
-    @Column(name = "agent_group_name", length = 200, nullable = false)
+    @Column(name = "agent_group_name", nullable = false)
     private String agentGroupName;
 
     @Column(name = "agent_group_description", length = 2000)
@@ -28,14 +28,11 @@ public class AgentGroupEntity {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "agent_groups_agents", joinColumns = @JoinColumn(name = "agent_group_id"))
     @OrderColumn(name = "order_idx")
-    @AttributeOverrides({
-            @AttributeOverride(name = "ip", column = @Column(name = "ip", length = 200, nullable = false)),
-            @AttributeOverride(name = "userName", column = @Column(name = "user_name", length = 200, nullable = false))
-    })
     private List<AgentValue> agents;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "agent_groups_tags", joinColumns = @JoinColumn(name = "agent_group_id"))
+    @Column(name = "tag_value")
     private List<String> tags;
 
     @Column(name = "active", nullable = false)
@@ -43,14 +40,14 @@ public class AgentGroupEntity {
     private boolean active;
 
 
-    @Column(name = "reg_user_id", length = 200, updatable = false)
+    @Column(name = "reg_user_id", updatable = false)
     private String regUserId;
 
     @CreationTimestamp
     @Column(name = "reg_date_time", nullable = false, updatable = false)
     private ZonedDateTime regDateTime;
 
-    @Column(name = "mod_user_id", length = 200)
+    @Column(name = "mod_user_id")
     private String modUserId;
 
     @UpdateTimestamp

@@ -14,38 +14,33 @@ import java.util.List;
 public class JobEntity {
 
     @Id
+    @Column(name = "job_id", nullable = false)
     private String jobId;
 
-    @Column(length = 200, nullable = false)
+    @Column(name = "job_name", nullable = false)
     private String jobName;
 
-    @Column(length = 2000)
+    @Column(name = "job_description", length = 2000)
     private String jobDescription;
 
-    @Column(name = "job_type", updatable = false)
+    @Column(name = "job_type", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     private JobType jobType;
 
-    @Column(nullable = false)
+    @Column(name = "active", nullable = false)
     @ColumnDefault("true")
     private boolean active;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "jobs_target_agents", joinColumns = @JoinColumn(name = "job_id"))
     @OrderColumn(name = "order_idx")
-    @AttributeOverrides({
-            @AttributeOverride(name = "targetAgentType", column = @Column(name = "target_agent_type", length = 200, nullable = false)),
-            @AttributeOverride(name = "agentGroupId", column = @Column(name = "agent_group_id", length = 200)),
-            @AttributeOverride(name = "ip", column = @Column(name = "ip", length = 200)),
-            @AttributeOverride(name = "userName", column = @Column(name = "user_name", length = 200))
-    })
     private List<JobTargetAgentValue> targetAgents;
 
 
-    @Column(length = 200)
+    @Column(name = "period")
     private String period;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "script", columnDefinition = "TEXT")
     private String script;
 
 }

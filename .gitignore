@@ -36,3 +36,4 @@ build/
 .env
 test-secret.properties
 .DS_store
+data/

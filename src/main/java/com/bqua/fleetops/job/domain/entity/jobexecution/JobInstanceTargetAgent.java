@@ -19,7 +19,7 @@ public class JobInstanceTargetAgent {
 
     private String agentGroupId;
 
-    private JobExecutionTargetAgentStatus status;
+    private JobExecutionTargetAgentStatus jobExecutionTargetAgentStatus;
 
     private ZonedDateTime startDateTime;
 
@@ -32,43 +32,43 @@ public class JobInstanceTargetAgent {
     }
 
     public void toStart() {
-        if (status != JobExecutionTargetAgentStatus.CREATED) {
+        if (jobExecutionTargetAgentStatus != JobExecutionTargetAgentStatus.CREATED) {
             throw new IllegalStateException("Cannot start job execution target agent " + this);
         }
         startDateTime = ZonedDateTime.now();
-        status = JobExecutionTargetAgentStatus.STARTED;
+        jobExecutionTargetAgentStatus = JobExecutionTargetAgentStatus.STARTED;
     }
 
     public void toComplete() {
-        if (status != JobExecutionTargetAgentStatus.STARTED) {
+        if (jobExecutionTargetAgentStatus != JobExecutionTargetAgentStatus.STARTED) {
             throw new IllegalStateException("Cannot finish job execution target agent " + this);
         }
         endDateTime = ZonedDateTime.now();
-        status = JobExecutionTargetAgentStatus.COMPLETED;
+        jobExecutionTargetAgentStatus = JobExecutionTargetAgentStatus.COMPLETED;
     }
 
     public void toStop() {
-        if (status != JobExecutionTargetAgentStatus.STARTED) {
+        if (jobExecutionTargetAgentStatus != JobExecutionTargetAgentStatus.STARTED) {
             throw new IllegalStateException("Cannot stop job execution target agent " + this);
         }
         endDateTime = ZonedDateTime.now();
-        status = JobExecutionTargetAgentStatus.STOPPED;
+        jobExecutionTargetAgentStatus = JobExecutionTargetAgentStatus.STOPPED;
     }
 
     public void toFail() {
-        if (status != JobExecutionTargetAgentStatus.STARTED) {
+        if (jobExecutionTargetAgentStatus != JobExecutionTargetAgentStatus.STARTED) {
             throw new IllegalStateException("Cannot fail job execution target agent " + this);
         }
         endDateTime = ZonedDateTime.now();
-        status = JobExecutionTargetAgentStatus.FAILED;
+        jobExecutionTargetAgentStatus = JobExecutionTargetAgentStatus.FAILED;
     }
 
     public void toSkip() {
-        if (status != JobExecutionTargetAgentStatus.STARTED) {
+        if (jobExecutionTargetAgentStatus != JobExecutionTargetAgentStatus.STARTED) {
             throw new IllegalStateException("Cannot skip job execution target agent " + this);
         }
         endDateTime = ZonedDateTime.now();
-        status = JobExecutionTargetAgentStatus.SKIPPED;
+        jobExecutionTargetAgentStatus = JobExecutionTargetAgentStatus.SKIPPED;
     }
 
     public JobExecutionTargetAgent toExecution() {
@@ -77,7 +77,7 @@ public class JobInstanceTargetAgent {
                 .ip(ip)
                 .userName(userName)
                 .agentGroupId(agentGroupId)
-                .status(status)
+                .jobExecutionTargetAgentStatus(jobExecutionTargetAgentStatus)
                 .startDateTime(startDateTime)
                 .endDateTime(endDateTime)
                 .logCollection(logCollection)

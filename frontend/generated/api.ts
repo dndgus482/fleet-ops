@@ -1578,7 +1578,7 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
         /**
          * Add a new job to the system
          * @summary Create a new job
-         * @param {SaveJobReq} saveJobReq Job details
+         * @param {SaveJobReq} saveJobReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1722,7 +1722,7 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
          * Enable or disable the active status of a job
          * @summary Switch job active status
          * @param {string} jobId 
-         * @param {SwitchActiveReq} switchActiveReq Active status details
+         * @param {SwitchActiveReq} switchActiveReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1762,7 +1762,7 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
          * Modify an existing job
          * @summary Update a job
          * @param {string} jobId 
-         * @param {SaveJobReq} saveJobReq Updated job details
+         * @param {SaveJobReq} saveJobReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1811,7 +1811,7 @@ export const JobApiFp = function(configuration?: Configuration) {
         /**
          * Add a new job to the system
          * @summary Create a new job
-         * @param {SaveJobReq} saveJobReq Job details
+         * @param {SaveJobReq} saveJobReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1864,7 +1864,7 @@ export const JobApiFp = function(configuration?: Configuration) {
          * Enable or disable the active status of a job
          * @summary Switch job active status
          * @param {string} jobId 
-         * @param {SwitchActiveReq} switchActiveReq Active status details
+         * @param {SwitchActiveReq} switchActiveReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1878,7 +1878,7 @@ export const JobApiFp = function(configuration?: Configuration) {
          * Modify an existing job
          * @summary Update a job
          * @param {string} jobId 
-         * @param {SaveJobReq} saveJobReq Updated job details
+         * @param {SaveJobReq} saveJobReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1901,7 +1901,7 @@ export const JobApiFactory = function (configuration?: Configuration, basePath?:
         /**
          * Add a new job to the system
          * @summary Create a new job
-         * @param {SaveJobReq} saveJobReq Job details
+         * @param {SaveJobReq} saveJobReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1942,7 +1942,7 @@ export const JobApiFactory = function (configuration?: Configuration, basePath?:
          * Enable or disable the active status of a job
          * @summary Switch job active status
          * @param {string} jobId 
-         * @param {SwitchActiveReq} switchActiveReq Active status details
+         * @param {SwitchActiveReq} switchActiveReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1953,7 +1953,7 @@ export const JobApiFactory = function (configuration?: Configuration, basePath?:
          * Modify an existing job
          * @summary Update a job
          * @param {string} jobId 
-         * @param {SaveJobReq} saveJobReq Updated job details
+         * @param {SaveJobReq} saveJobReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1973,7 +1973,7 @@ export class JobApi extends BaseAPI {
     /**
      * Add a new job to the system
      * @summary Create a new job
-     * @param {SaveJobReq} saveJobReq Job details
+     * @param {SaveJobReq} saveJobReq 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobApi
@@ -2022,7 +2022,7 @@ export class JobApi extends BaseAPI {
      * Enable or disable the active status of a job
      * @summary Switch job active status
      * @param {string} jobId 
-     * @param {SwitchActiveReq} switchActiveReq Active status details
+     * @param {SwitchActiveReq} switchActiveReq 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobApi
@@ -2035,7 +2035,7 @@ export class JobApi extends BaseAPI {
      * Modify an existing job
      * @summary Update a job
      * @param {string} jobId 
-     * @param {SaveJobReq} saveJobReq Updated job details
+     * @param {SaveJobReq} saveJobReq 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobApi

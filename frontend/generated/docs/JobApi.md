@@ -28,7 +28,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new JobApi(configuration);
 
-let saveJobReq: SaveJobReq; //Job details
+let saveJobReq: SaveJobReq; //
 
 const { status, data } = await apiInstance.createJob(
     saveJobReq
@@ -39,7 +39,7 @@ const { status, data } = await apiInstance.createJob(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **saveJobReq** | **SaveJobReq**| Job details | |
+| **saveJobReq** | **SaveJobReq**|  | |
 
 
 ### Return type
@@ -251,7 +251,7 @@ const configuration = new Configuration();
 const apiInstance = new JobApi(configuration);
 
 let jobId: string; // (default to undefined)
-let switchActiveReq: SwitchActiveReq; //Active status details
+let switchActiveReq: SwitchActiveReq; //
 
 const { status, data } = await apiInstance.switchActiveJob(
     jobId,
@@ -263,7 +263,7 @@ const { status, data } = await apiInstance.switchActiveJob(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **switchActiveReq** | **SwitchActiveReq**| Active status details | |
+| **switchActiveReq** | **SwitchActiveReq**|  | |
 | **jobId** | [**string**] |  | defaults to undefined|
 
 
@@ -310,7 +310,7 @@ const configuration = new Configuration();
 const apiInstance = new JobApi(configuration);
 
 let jobId: string; // (default to undefined)
-let saveJobReq: SaveJobReq; //Updated job details
+let saveJobReq: SaveJobReq; //
 
 const { status, data } = await apiInstance.updateJob(
     jobId,
@@ -322,7 +322,7 @@ const { status, data } = await apiInstance.updateJob(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **saveJobReq** | **SaveJobReq**| Updated job details | |
+| **saveJobReq** | **SaveJobReq**|  | |
 | **jobId** | [**string**] |  | defaults to undefined|
 
 

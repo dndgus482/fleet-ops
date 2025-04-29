@@ -15,7 +15,7 @@ public final class JobExecutionTargetAgent {
     private final String ip;
     private final String userName;
     private final String agentGroupId;
-    private final JobExecutionTargetAgentStatus status;
+    private final JobExecutionTargetAgentStatus jobExecutionTargetAgentStatus;
     private final ZonedDateTime startDateTime;
     private final ZonedDateTime endDateTime;
     private final List<String> logCollection;
@@ -26,7 +26,7 @@ public final class JobExecutionTargetAgent {
             String ip,
             String userName,
             String agentGroupId,
-            JobExecutionTargetAgentStatus status,
+            JobExecutionTargetAgentStatus jobExecutionTargetAgentStatus,
             ZonedDateTime startDateTime,
             ZonedDateTime endDateTime,
             List<String> logCollection) {
@@ -34,7 +34,7 @@ public final class JobExecutionTargetAgent {
         this.ip = ip;
         this.userName = userName;
         this.agentGroupId = agentGroupId;
-        this.status = status;
+        this.jobExecutionTargetAgentStatus = jobExecutionTargetAgentStatus;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.logCollection = logCollection != null ?

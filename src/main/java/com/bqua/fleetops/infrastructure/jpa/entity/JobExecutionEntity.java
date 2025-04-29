@@ -27,11 +27,11 @@ public class JobExecutionEntity {
     @Column(name = "job_history_no", nullable = false)
     private Long jobHistoryNo;
 
-    @Column(name = "job_status", length = 100, nullable = false)
+    @Column(name = "job_execution_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private JobExecutionStatus jobExecutionStatus;
 
-    @Column(name = "execution_user_id", length = 100, updatable = false)
+    @Column(name = "execution_user_id", updatable = false)
     private String executionUserId;
 
     @Column(name = "execution_date_time")

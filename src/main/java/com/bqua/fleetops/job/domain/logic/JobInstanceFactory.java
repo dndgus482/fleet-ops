@@ -32,7 +32,7 @@ public class JobInstanceFactory {
                                                 .ip(target.getIp())
                                                 .userName(target.getUserName())
                                                 .agentGroupId(target.getAgentGroupId())
-                                                .status(JobExecutionTargetAgentStatus.CREATED)
+                                                .jobExecutionTargetAgentStatus(JobExecutionTargetAgentStatus.CREATED)
                                                 .logCollection(Collections.synchronizedList(new ArrayList<>()))
                                                 .build();
                                     })
