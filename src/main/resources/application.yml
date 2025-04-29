@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: fleet-ops
+
+  modulith:
+    detection-strategy: explicitly-annotated
+
+  datasource:
+    hikari:
+      maximum-pool-size: 50
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.bqua.fleetops
+  type-handlers-package: com.bqua.fleetops.infrastructure.mybatis.typehandler
+
+logging:
+  level:
+    com.bqua.fleetops: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging.simp: DEBUG
+    org.springframework.web.socket.config: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.http.converter: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,custom-scheduler
+  health:
+    defaults:
+      enabled: true

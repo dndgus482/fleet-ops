@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bqua.fleetops.job.adapter.outbound.JobMapper">
+
+    <resultMap id="jobResultMap" type="com.bqua.fleetops.job.inbound.dto.JobRes">
+        <id property="jobId" column="job_id"/>
+        <result property="jobName" column="job_name"/>
+        <result property="jobDescription" column="job_description"/>
+        <result property="jobType" column="job_type"/>
+        <result property="active" column="active"/>
+        <result property="period" column="period"/>
+        <result property="script" column="script"/>
+
+        <collection property="targetAgents" ofType="com.bqua.fleetops.job.inbound.dto.TargetAgentRes">
+            <result property="targetAgentType" column="target_agent_type" />
+            <result property="agentGroupId" column="agent_group_id"/>
+            <result property="agentGroupName" column="agent_group_name"/>
+            <result property="ip" column="ip"/>
+            <result property="userName" column="user_name"/>
+        </collection>
+    </resultMap>
+
+    <select id="search" resultMap="jobResultMap">
+        SELECT
+            j.job_id,
+            j.job_name,
+            j.job_description,
+            j.job_type,
+            j.active,
+            jtc.target_agent_type,
+            jtc.agent_group_id,
+            jtc.ip,
+            jtc.user_name,
+            ag.agent_group_name,
+            j.period,
+            j.script
+        FROM jobs j
+            LEFT JOIN jobs_target_agents jtc ON j.job_id = jtc.job_id
+            LEFT JOIN agent_groups ag ON jtc.agent_group_id = ag.agent_group_id
+        <include refid="jobSearchWhere"/>
+        ORDER BY
+        <choose>
+            <when test="spec.sort.sortField == 'jobId'">
+                j.job_id ${spec.sort.sortDirection}
+            </when>
+            <when test="spec.sort.sortField == 'jobName'">
+                j.job_name ${spec.sort.sortDirection}, j.job_id ASC
+            </when>
+        </choose>
+        <include refid="com.bqua.fleetops.infrastructure.mybatis.pageClause"/>
+    </select>
+
+    <select id="searchCount" resultType="long">
+        SELECT
+            COUNT(DISTINCT j.job_id)
+        FROM jobs j
+            LEFT JOIN jobs_target_agents jtc ON j.job_id = jtc.job_id
+            LEFT JOIN agent_groups ag ON jtc.agent_group_id = ag.agent_group_id
+        <include refid="jobSearchWhere"/>
+    </select>
+
+
+    <select id="findByJobId" resultMap="jobResultMap">
+        SELECT
+            j.job_id,
+            j.job_name,
+            j.job_description,
+            j.job_type,
+            j.active,
+            jtc.target_agent_type,
+            jtc.agent_group_id,
+            jtc.ip,
+            jtc.user_name,
+            ag.agent_group_name,
+            j.period,
+            j.script
+        FROM jobs j
+                 LEFT JOIN jobs_target_agents jtc ON j.job_id = jtc.job_id
+                 LEFT JOIN agent_groups ag ON jtc.agent_group_id = ag.agent_group_id
+        WHERE j.job_id = #{jobId}
+    </select>
+
+    <sql id="jobSearchWhere">
+        <where>
+            <if test="!@org.springframework.util.StringUtils@isEmpty(spec.jobName)">
+                AND LOWER(j.job_name) LIKE CONCAT('%', LOWER(#{spec.jobName}), '%')
+            </if>
+        </where>
+    </sql>
+</mapper>
