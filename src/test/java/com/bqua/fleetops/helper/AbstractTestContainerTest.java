@@ -4,17 +4,21 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.MountableFile;
 
 
 @Testcontainers
 public abstract class AbstractTestContainerTest {
 
-    // 공유용 Singleton Container
     static final PostgreSQLContainer<?> POSTGRES_SQL_CONTAINER;
 
     static {
         POSTGRES_SQL_CONTAINER = new PostgreSQLContainer<>("postgres:17.4")
-                .withInitScript("init.sql");
+                .withCopyFileToContainer(
+                        MountableFile.forHostPath("./docker/init/init.sql"),
+                        "/docker-entrypoint-initdb.d/init.sql"
+                )
+                .withInitScripts("insert.sql");
         POSTGRES_SQL_CONTAINER.start(); // 직접 스타트
     }
 

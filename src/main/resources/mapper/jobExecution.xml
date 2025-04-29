@@ -9,7 +9,7 @@
         <id property="jobExecutionNo" column="job_execution_no"/>
         <result property="jobName" column="job_name"/>
         <result property="jobHistoryNo" column="job_history_no"/>
-        <result property="jobExecutionStatus" column="job_status"/>
+        <result property="jobExecutionStatus" column="job_execution_status"/>
         <result property="executionUserId" column="execution_user_id"/>
         <result property="executionDateTime" column="execution_date_time"/>
         <result property="startDateTime" column="start_date_time"/>
@@ -30,7 +30,7 @@
             je.job_execution_no,
             j.job_name,
             je.job_history_no,
-            je.job_status,
+            je.job_execution_status,
             je.execution_user_id,
             je.execution_date_time,
             je.start_date_time,
@@ -71,7 +71,7 @@
             je.job_execution_no,
             j.job_name,
             je.job_history_no,
-            je.job_status,
+            je.job_execution_status,
             je.execution_user_id,
             je.execution_date_time,
             je.start_date_time,
