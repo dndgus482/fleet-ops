@@ -40,3 +40,9 @@ management:
   health:
     defaults:
       enabled: true
+
+
+########## Custom ##########
+fleet-ops:
+  ssh:
+    private-key-path: ${PRIVATE_KEY_PATH}

@@ -34,6 +34,6 @@ build/
 
 ### Custom ###
 .env
-test-secret.properties
 .DS_store
 data/
+application-local.yml

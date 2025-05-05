@@ -1,0 +1,10 @@
+spring:
+  config:
+    import:
+      - classpath:application.yml
+
+
+test:
+  ssh:
+    ip: ${TEST_SSH_IP}
+    user-name: ${TEST_SSH_USER_NAME}
