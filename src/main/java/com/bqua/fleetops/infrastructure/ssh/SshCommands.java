@@ -1,8 +1,8 @@
 package com.bqua.fleetops.infrastructure.ssh;
 
+import com.bqua.fleetops.common.util.HeredocEscaper;
 import com.bqua.fleetops.infrastructure.ssh.dto.LogCallback;
 import com.bqua.fleetops.infrastructure.ssh.dto.SshConnectionTestResult;
-import com.bqua.fleetops.common.util.HeredocEscaper;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sshd.client.SshClient;
@@ -26,7 +26,10 @@ public class SshCommands {
     private final static int PORT = 22;
     private final SshClient sshClient;
 
-    public SshCommands() {
+    private final KeyPairLoader keyPairLoader;
+
+    public SshCommands(KeyPairLoader keyPairLoader) {
+        this.keyPairLoader = keyPairLoader;
         sshClient = SshClient.setUpDefaultClient();
         sshClient.start();
     }
@@ -78,10 +81,10 @@ public class SshCommands {
     private ClientSession connect(String ip, String username) throws IOException {
         ConnectFuture connectFuture = sshClient.connect(username, ip, PORT).verify(10, TimeUnit.SECONDS);
         ClientSession session = connectFuture.getSession();
+        session.addPublicKeyIdentity(keyPairLoader.getKeyPair());
         session.auth().verify(10, TimeUnit.SECONDS);
         return session;
     }
-
 
     /**
      * bash -n -s 명령을 사용하여 로컬에서 쉘 스크립트의 문법을 검사합니다.

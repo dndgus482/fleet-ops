@@ -1,37 +1,26 @@
-package com.bqua.fleetops.common.infrastructure.ssh;
+package com.bqua.fleetops.infrastructure.ssh;
 
-import com.bqua.fleetops.helper.EnvLoader;
-import com.bqua.fleetops.infrastructure.ssh.SshCommands;
 import com.bqua.fleetops.common.util.HeredocEscaper;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest(classes = {SshCommands.class, KeyPairLoader.class})
+@EnableConfigurationProperties(SshProperties.class)
 class SshCommandsTest {
 
-    private static SshCommands ssh;
-    private static String testIp;
-    private static String account;
+    @Autowired
+    private SshCommands ssh;
 
-    @BeforeAll
-    public static void setUp() {
-        ssh = new SshCommands();
+    @Value("${test.ssh.ip}")
+    private String testIp;
 
-        EnvLoader.loadFromTestSecretProperties();
-        testIp = System.getProperty("TEST_SSH_IP");
-        account = System.getProperty("TEST_SSH_ACCOUNT");
-
-        // Validate that required environment variables are set
-        assertNotNull(testIp, "Property TEST_SSH_IP is not set. See test-secret-template.properties for more info");
-        assertNotNull(account, "Property TEST_SSH_ACCOUNT is not set. See test-secret-template.properties for more info");
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        ssh.shutdown();
-    }
+    @Value("${test.ssh.user-name}")
+    private String account;
 
     @Test
     void shouldExecuteEchoCommand_whenGivenValidCommand() {
