@@ -72,7 +72,7 @@
   }
 
   async function pressJobHistory() {
-    await router.push({ name: 'jobHistory', params: { jobId } })
+    await router.push({ name: 'jobHistoryList', params: { jobId } })
   }
 
 

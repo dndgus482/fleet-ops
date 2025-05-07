@@ -3,20 +3,21 @@ package com.bqua.fleetops.job.domain.logic;
 import com.bqua.fleetops.job.domain.entity.job.Job;
 import com.bqua.fleetops.job.domain.entity.jobhistory.JobHistory;
 import com.bqua.fleetops.job.domain.outbound.JobHistoryRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class JobHistoryFactory {
 
-    private final JobHistoryRepository jobHistoryRepository;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    private final JobHistoryRepository jobHistoryRepository;
     public JobHistory create(Job job) {
         long jobHistoryNo = nextId(job.getJobId());
         return from(jobHistoryNo, job);
@@ -41,16 +42,8 @@ public class JobHistoryFactory {
     }
 
     private static Map<String, Object> toMap(Object obj) {
-        Map<String, Object> map = new HashMap<>();
-        for (Field field : obj.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            try {
-                map.put(field.getName(), field.get(obj));
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return map;
+        return objectMapper.convertValue(obj, new TypeReference<>() {
+        });
     }
 
 }

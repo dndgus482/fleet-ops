@@ -1,9 +1,9 @@
 package com.bqua.fleetops.job.application;
 
+import com.bqua.fleetops.common.dto.SortOption;
 import com.bqua.fleetops.helper.AbstractTestContainerTest;
 import com.bqua.fleetops.job.domain.entity.job.enums.JobType;
 import com.bqua.fleetops.common.dto.Page;
-import com.bqua.fleetops.common.dto.Sort;
 import com.bqua.fleetops.common.dto.SortDirection;
 import com.bqua.fleetops.job.inbound.dto.JobRes;
 import com.bqua.fleetops.job.inbound.dto.JobSearchReq;
@@ -32,7 +32,7 @@ class JobQueryServiceTest extends AbstractTestContainerTest {
         // Given
         JobSearchReq req = JobSearchReq.builder()
                 .jobName("jobName")
-                .sort(Sort.of("jobName", SortDirection.ASC))
+                .sortOption(SortOption.of("jobName", SortDirection.ASC))
                 .page(Page.of("0", 10))
                 .build();
 

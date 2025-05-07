@@ -4,6 +4,7 @@ import com.bqua.fleetops.common.dto.BaseSearchReq;
 import com.bqua.fleetops.common.dto.Page;
 import com.bqua.fleetops.common.dto.SortOption;
 import com.bqua.fleetops.common.dto.SortDirection;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
@@ -11,6 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Set;
 
@@ -18,22 +21,15 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-@Schema(description = "Request to search job executions based on various criteria")
-public class JobExecutionSearchReq extends BaseSearchReq {
+@Schema(description = "Request to search job history based on various criteria")
+public class JobHistorySearchReq extends BaseSearchReq {
 
-    private static final Set<String> ALLOWED_SORTS = Set.of("executionDateTime", "jobExecutionNo");
+    private static final Set<String> ALLOWED_SORTS = Set.of("jobHistoryNo");
 
-    @Schema(description = "Identifier of the job to filter by", example = "job456")
+    @Schema(hidden = true)
+    @JsonIgnore
     @Nullable
     private String jobId;
-
-    @Schema(description = "Agent group ID to filter by", example = "group123")
-    @Nullable
-    private String agentGroupId;
-
-    @Schema(description = "IP address of the agent, nullable if not applicable", example = "192.168.1.1")
-    @Nullable
-    private String ip;
 
     @Override
     protected Set<String> getAllowedSortFields() {
@@ -41,8 +37,8 @@ public class JobExecutionSearchReq extends BaseSearchReq {
     }
 
     @Schema(hidden = true)
-    public static JobExecutionSearchReq adjust(JobExecutionSearchReq req) {
-        JobExecutionSearchReq adjusted = (req != null) ? req : new JobExecutionSearchReq();
+    public static JobHistorySearchReq adjust(JobHistorySearchReq req) {
+        JobHistorySearchReq adjusted = (req != null) ? req : new JobHistorySearchReq();
         adjusted.adjustAll();
         return adjusted;
     }
@@ -50,17 +46,22 @@ public class JobExecutionSearchReq extends BaseSearchReq {
     @Override
     protected void adjustFilter() {
         jobId = StringUtils.trim(jobId);
-        agentGroupId = StringUtils.trim(agentGroupId);
-        ip = StringUtils.trim(ip);
     }
 
     @Override
     protected SortOption defaultSort() {
-        return SortOption.of("executionDateTime", SortDirection.DESC);
+        return SortOption.of("jobHistoryNo", SortDirection.DESC);
     }
 
     @Override
     protected Page defaultPage() {
         return Page.of("0", 10);
+    }
+
+    public Pageable toPageable() {
+        if (getPage().getMaxPageSize() == null) {
+            throw new IllegalStateException("maxPageSize cannot be null");
+        }
+        return PageRequest.of(getPage().getPageTokenNumber(), getPage().getMaxPageSize(), getSortOption().toSort());
     }
 }

@@ -1,9 +1,9 @@
 package com.bqua.fleetops.job.application;
 
+import com.bqua.fleetops.common.dto.SortOption;
 import com.bqua.fleetops.common.exception.NotFoundException;
 import com.bqua.fleetops.helper.AbstractTestContainerTest;
 import com.bqua.fleetops.common.dto.Page;
-import com.bqua.fleetops.common.dto.Sort;
 import com.bqua.fleetops.common.dto.SortDirection;
 import com.bqua.fleetops.job.domain.entity.jobexecution.enums.JobExecutionStatus;
 import com.bqua.fleetops.job.inbound.dto.JobExecutionRes;
@@ -28,7 +28,7 @@ class JobExecutionQueryServiceTest extends AbstractTestContainerTest {
     void shouldSearchWhenValidCriteria() {
         var jobExecutionSearchReq = JobExecutionSearchReq.builder()
                 .jobId("1")
-                .sort(Sort.of("jobExecutionNo", SortDirection.DESC))
+                .sortOption(SortOption.of("jobExecutionNo", SortDirection.DESC))
                 .page(Page.of(null, 10))
                 .build();
 

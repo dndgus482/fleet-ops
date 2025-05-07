@@ -2,7 +2,7 @@
   import { SortDirection, toggleSortDirection } from '@/types/search.ts'
 
   const props = defineProps<{
-    fields: { key: string; label: string }[]
+    fields: { key: string; label: string, sortable: boolean }[]
     modelValue: {
       sortField: string
       sortDirection: SortDirection
@@ -15,7 +15,10 @@
 
   const toggleSort = (key: string) => {
     if (props.modelValue.sortField === key) {
-      emit('update:modelValue', { sortField: key, sortDirection: toggleSortDirection(props.modelValue.sortDirection) })
+      emit('update:modelValue', {
+        sortField: key,
+        sortDirection: toggleSortDirection(props.modelValue.sortDirection),
+      })
     } else {
       emit('update:modelValue', { sortField: key, sortDirection: SortDirection.ASC })
     }
@@ -39,8 +42,13 @@
         :direction="props.modelValue.sortDirection"
         :toggle="() => toggleSort(field.key)"
       >
-        <!-- 기본 렌더링 -->
-        <button @click="toggleSort(field.key)" class="text-left hover:text-blue-600 w-full">
+        <!-- default rendering -->
+        <button
+          @click="toggleSort(field.key)"
+          :class="field.sortable
+            ? 'flex items-center gap-1'
+            : 'flex items-center gap-1 btn-disabled'"
+        >
           {{ field.label }}
           <span v-if="props.modelValue.sortField === field.key">
             {{ props.modelValue.sortDirection === 'ASC' ? '▲' : '▼' }}

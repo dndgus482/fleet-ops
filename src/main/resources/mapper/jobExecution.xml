@@ -46,11 +46,11 @@
         <include refid="jobExecutionSearchWhere"/>
         ORDER BY
         <choose>
-            <when test="spec.sort.sortField == 'executionDateTime'">
-                je.execution_date_time ${spec.sort.sortDirection}
+            <when test="spec.sortOption.sortField == 'executionDateTime'">
+                je.execution_date_time ${spec.sortOption.sortDirection}
             </when>
-            <when test="spec.sort.sortField == 'jobExecutionNo'">
-                je.job_execution_no ${spec.sort.sortDirection}
+            <when test="spec.sortOption.sortField == 'jobExecutionNo'">
+                je.job_execution_no ${spec.sortOption.sortDirection}
             </when>
         </choose>
         <include refid="com.bqua.fleetops.infrastructure.mybatis.pageClause"/>

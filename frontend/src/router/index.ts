@@ -3,7 +3,7 @@ import JobListView from "@/views/JobListView.vue";
 import JobDetailView from '@/views/JobDetailView.vue'
 import JobExecutionDetailView from '@/views/JobExecutionDetailView.vue'
 import JobExecutionListView from '@/views/JobExecutionListView.vue'
-import JobHistoryView from '@/views/JobHistoryView.vue'
+import JobHistoryListView from '@/views/JobHistoryListView.vue'
 import JobHistoryDetailView from '@/views/JobHistoryDetailView.vue'
 import AgentAgentGroupListView from '@/views/AgentGroupListView.vue'
 import AgentGroupDetailView from '@/views/AgentGroupDetailView.vue'
@@ -37,8 +37,8 @@ const router = createRouter({
     },
     {
       path: '/jobs/:jobId/history',
-      name: 'jobHistory',
-      component: JobHistoryView,
+      name: 'jobHistoryList',
+      component: JobHistoryListView,
       props: true
     },
     {

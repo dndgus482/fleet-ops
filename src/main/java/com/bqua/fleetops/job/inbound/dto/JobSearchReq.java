@@ -2,7 +2,7 @@ package com.bqua.fleetops.job.inbound.dto;
 
 import com.bqua.fleetops.common.dto.BaseSearchReq;
 import com.bqua.fleetops.common.dto.Page;
-import com.bqua.fleetops.common.dto.Sort;
+import com.bqua.fleetops.common.dto.SortOption;
 import com.bqua.fleetops.common.dto.SortDirection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
@@ -40,8 +40,8 @@ public class JobSearchReq extends BaseSearchReq {
     }
 
     @Override
-    protected Sort defaultSort() {
-        return Sort.of("jobName", SortDirection.ASC);
+    protected SortOption defaultSort() {
+        return SortOption.of("jobName", SortDirection.ASC);
     }
 
     @Override

@@ -5,14 +5,13 @@ import com.bqua.fleetops.job.domain.outbound.JobHistoryRepository;
 import com.bqua.fleetops.infrastructure.jpa.entity.JobHistoryEntity;
 import com.bqua.fleetops.job.adapter.outbound.mapper.JobHistoryMapper;
 import com.bqua.fleetops.infrastructure.jpa.JpaJobHistoryRepository;
+import com.bqua.fleetops.job.inbound.dto.JobHistorySearchReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -20,14 +19,6 @@ import java.util.stream.Collectors;
 public class JobHistoryRepositoryImpl implements JobHistoryRepository {
 
     private final JpaJobHistoryRepository jpaJobHistoryRepository;
-
-    @Override
-    public List<JobHistory> findJobHistoryByJobId(String jobId) {
-        return jpaJobHistoryRepository.findByJobId(jobId)
-                .stream()
-                .map(JobHistoryMapper.INSTANCE::toDomain)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public Optional<JobHistory> findJobHistoryById(String jobId, long jobHistoryNo) {
@@ -56,6 +47,19 @@ public class JobHistoryRepositoryImpl implements JobHistoryRepository {
     public Optional<Long> findLastJobHistoryNoByJobId(String jobId) {
         return jpaJobHistoryRepository.findFirstByJobIdOrderByJobHistoryNoDesc(jobId)
                 .map(JobHistoryEntity::getJobHistoryNo);
+    }
+
+    @Override
+    public List<JobHistory> search(JobHistorySearchReq req) {
+        return jpaJobHistoryRepository.findAll(req.toPageable())
+                .stream()
+                .map(JobHistoryMapper.INSTANCE::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long searchCount(JobHistorySearchReq req) {
+        return 0;
     }
 
 }
