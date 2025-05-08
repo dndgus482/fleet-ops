@@ -1,8 +1,6 @@
 package com.bqua.fleetops.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,13 +16,9 @@ import java.util.Set;
 public abstract class BaseSearchReq {
 
     @JsonUnwrapped
-    @Schema(description = "sort results")
-    @Nullable
-    private Sort sort;
+    private SortOption sortOption;
 
     @JsonUnwrapped
-    @Schema(description = "pageable for search")
-    @Nullable
     private Page page;
 
     protected void adjustAll() {
@@ -34,9 +28,9 @@ public abstract class BaseSearchReq {
     }
 
     protected void adjustSort() {
-        this.sort = Optional.ofNullable(sort)
+        this.sortOption = Optional.ofNullable(sortOption)
                 .filter(this::isAllowedSort)
-                .map(Sort::adjust)
+                .map(SortOption::adjust)
                 .orElseGet(this::defaultSort);
     }
 
@@ -48,11 +42,11 @@ public abstract class BaseSearchReq {
 
     protected abstract Set<String> getAllowedSortFields();
 
-    protected abstract Sort defaultSort();
+    protected abstract SortOption defaultSort();
 
     protected abstract Page defaultPage();
 
-    private boolean isAllowedSort(Sort sort) {
-        return getAllowedSortFields().contains(sort.getSortField());
+    private boolean isAllowedSort(SortOption sortOption) {
+        return getAllowedSortFields().contains(sortOption.getSortField());
     }
 }

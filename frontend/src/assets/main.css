@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.btn-disabled {
+  @apply cursor-not-allowed pointer-events-none;
+}

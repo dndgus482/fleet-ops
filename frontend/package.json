@@ -13,7 +13,7 @@
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "gen-api": "openapi-generator-cli generate -i http://localhost:8080/v3/api-docs -g typescript-axios -o ./generated"
+    "gen-api": "openapi-generator-cli generate -i http://localhost:8080/v3/api-docs -g typescript-axios -o ./generated  --global-property apiDocs=false,modelDocs=false"
   },
   "dependencies": {
     "@stomp/stompjs": "^7.1.1",

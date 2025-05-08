@@ -11,8 +11,4 @@ public class TargetAgent {
     private String agentGroupId;
     private String ip;
     private String userName;
-
-    public String getAgentDisplayName() {
-        return userName + '@' + ip;
-    }
 }

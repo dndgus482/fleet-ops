@@ -5,11 +5,12 @@ import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Sort;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Sort {
+public class SortOption {
 
     @Schema(description = "sort field")
     @Nullable
@@ -19,13 +20,20 @@ public class Sort {
     @Nullable
     private SortDirection sortDirection;
 
-    public static Sort of(String sortField, SortDirection direction) {
-        return new Sort(sortField, direction);
+    public static SortOption of(String sortField, SortDirection direction) {
+        return new SortOption(sortField, direction);
     }
 
-    public Sort adjust() {
+    public SortOption adjust() {
         sortDirection = sortDirection != null ? sortDirection : SortDirection.ASC;
         return this;
+    }
+
+    public org.springframework.data.domain.Sort toSort() {
+        if (sortDirection != null) {
+            return Sort.by(Sort.Direction.fromString(sortDirection.name()), sortField);
+        }
+        throw new IllegalArgumentException("Sort direction is null");
     }
 
 }

@@ -16,12 +16,12 @@
 
   const el = useTemplateRef<HTMLElement>('jobListRef')
 
-  const fields = [
-    { key: 'jobName', label: 'JobName' },
-    { key: 'jobExecutionNo', label: '#' },
-    { key: 'jobExecutionStatus', label: 'Status' },
-    { key: 'startDateTime', label: 'Started' },
-    { key: 'duration', label: 'Duration' },
+  const tableHeaders = [
+    { key: 'jobName', label: 'JobName', sortable: true },
+    { key: 'jobExecutionNo', label: '#', sortable: true },
+    { key: 'jobExecutionStatus', label: 'Status', sortable: true },
+    { key: 'startDateTime', label: 'Started', sortable: false },
+    { key: 'duration', label: 'Duration', sortable: false },
   ]
 
   useInfiniteScroll(
@@ -72,14 +72,7 @@
 
     <JobExecutionSearchBar v-model:searchKeyword="searchFilter" />
 
-    <SortableTableHeader v-model="sort" :fields="fields">
-      <template #column="{ field, isActive, direction, toggle }">
-        <div class="flex items-center gap-1 cursor-pointer" @click="toggle">
-          <span>{{ field.label }}</span>
-          <span>{{ isActive ? (direction === 'ASC' ? '▲' : '▼') : '' }}</span>
-        </div>
-      </template>
-    </SortableTableHeader>
+    <SortableTableHeader v-model="sort" :fields="tableHeaders" />
 
     <div class="overflow-auto max-h-[600px]">
       <ul ref="jobListRef" class="divide-y divide-gray-100">

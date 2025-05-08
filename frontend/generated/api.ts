@@ -272,12 +272,6 @@ export interface JobExecutionSearchReq {
      */
     'sortDirection'?: JobExecutionSearchReqSortDirectionEnum;
     /**
-     * 
-     * @type {any}
-     * @memberof JobExecutionSearchReq
-     */
-    'sort'?: any;
-    /**
      * null if first search
      * @type {string}
      * @memberof JobExecutionSearchReq
@@ -289,12 +283,6 @@ export interface JobExecutionSearchReq {
      * @memberof JobExecutionSearchReq
      */
     'maxPageSize'?: number;
-    /**
-     * 
-     * @type {any}
-     * @memberof JobExecutionSearchReq
-     */
-    'page'?: any;
     /**
      * Identifier of the job to filter by
      * @type {string}
@@ -416,6 +404,45 @@ export const JobHistoryResJobTypeEnum = {
 export type JobHistoryResJobTypeEnum = typeof JobHistoryResJobTypeEnum[keyof typeof JobHistoryResJobTypeEnum];
 
 /**
+ * Request to search job history based on various criteria
+ * @export
+ * @interface JobHistorySearchReq
+ */
+export interface JobHistorySearchReq {
+    /**
+     * sort field
+     * @type {string}
+     * @memberof JobHistorySearchReq
+     */
+    'sortField'?: string;
+    /**
+     * sort direction
+     * @type {string}
+     * @memberof JobHistorySearchReq
+     */
+    'sortDirection'?: JobHistorySearchReqSortDirectionEnum;
+    /**
+     * null if first search
+     * @type {string}
+     * @memberof JobHistorySearchReq
+     */
+    'pageToken'?: string;
+    /**
+     * max size to get
+     * @type {number}
+     * @memberof JobHistorySearchReq
+     */
+    'maxPageSize'?: number;
+}
+
+export const JobHistorySearchReqSortDirectionEnum = {
+    Asc: 'ASC',
+    Desc: 'DESC'
+} as const;
+
+export type JobHistorySearchReqSortDirectionEnum = typeof JobHistorySearchReqSortDirectionEnum[keyof typeof JobHistorySearchReqSortDirectionEnum];
+
+/**
  * Response containing details of a job
  * @export
  * @interface JobRes
@@ -496,12 +523,6 @@ export interface JobSearchReq {
      */
     'sortDirection'?: JobSearchReqSortDirectionEnum;
     /**
-     * 
-     * @type {any}
-     * @memberof JobSearchReq
-     */
-    'sort'?: any;
-    /**
      * null if first search
      * @type {string}
      * @memberof JobSearchReq
@@ -513,12 +534,6 @@ export interface JobSearchReq {
      * @memberof JobSearchReq
      */
     'maxPageSize'?: number;
-    /**
-     * 
-     * @type {any}
-     * @memberof JobSearchReq
-     */
-    'page'?: any;
     /**
      * job name to filter by
      * @type {string}
@@ -556,6 +571,31 @@ export interface PagedResultJobExecutionRes {
      * total count of matched search results
      * @type {number}
      * @memberof PagedResultJobExecutionRes
+     */
+    'totalCount': number;
+}
+/**
+ * 
+ * @export
+ * @interface PagedResultJobHistoryRes
+ */
+export interface PagedResultJobHistoryRes {
+    /**
+     * results of search
+     * @type {Array<JobHistoryRes>}
+     * @memberof PagedResultJobHistoryRes
+     */
+    'results': Array<JobHistoryRes>;
+    /**
+     * use this token for the next page
+     * @type {string}
+     * @memberof PagedResultJobHistoryRes
+     */
+    'nextPageToken'?: string;
+    /**
+     * total count of matched search results
+     * @type {number}
+     * @memberof PagedResultJobHistoryRes
      */
     'totalCount': number;
 }
@@ -2499,15 +2539,18 @@ export const JobHistoryApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
-         * Retrieve the history of job executions based on job ID
-         * @summary Get job history by job ID
+         * Search job histories
+         * @summary search job histories
          * @param {string} jobId 
+         * @param {JobHistorySearchReq} jobHistorySearchReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getJobHistoryByJobId: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        searchJobHistory: async (jobId: string, jobHistorySearchReq: JobHistorySearchReq, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'jobId' is not null or undefined
-            assertParamExists('getJobHistoryByJobId', 'jobId', jobId)
+            assertParamExists('searchJobHistory', 'jobId', jobId)
+            // verify required parameter 'jobHistorySearchReq' is not null or undefined
+            assertParamExists('searchJobHistory', 'jobHistorySearchReq', jobHistorySearchReq)
             const localVarPath = `/api/jobs/{jobId}/history`
                 .replace(`{${"jobId"}}`, encodeURIComponent(String(jobId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2517,15 +2560,18 @@ export const JobHistoryApiAxiosParamCreator = function (configuration?: Configur
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
 
     
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(jobHistorySearchReq, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2557,16 +2603,17 @@ export const JobHistoryApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve the history of job executions based on job ID
-         * @summary Get job history by job ID
+         * Search job histories
+         * @summary search job histories
          * @param {string} jobId 
+         * @param {JobHistorySearchReq} jobHistorySearchReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getJobHistoryByJobId(jobId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobHistoryRes>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getJobHistoryByJobId(jobId, options);
+        async searchJobHistory(jobId: string, jobHistorySearchReq: JobHistorySearchReq, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PagedResultJobHistoryRes>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchJobHistory(jobId, jobHistorySearchReq, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['JobHistoryApi.getJobHistoryByJobId']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['JobHistoryApi.searchJobHistory']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -2591,14 +2638,15 @@ export const JobHistoryApiFactory = function (configuration?: Configuration, bas
             return localVarFp.getJobHistoryById(jobId, jobHistoryNo, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve the history of job executions based on job ID
-         * @summary Get job history by job ID
+         * Search job histories
+         * @summary search job histories
          * @param {string} jobId 
+         * @param {JobHistorySearchReq} jobHistorySearchReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getJobHistoryByJobId(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<JobHistoryRes>> {
-            return localVarFp.getJobHistoryByJobId(jobId, options).then((request) => request(axios, basePath));
+        searchJobHistory(jobId: string, jobHistorySearchReq: JobHistorySearchReq, options?: RawAxiosRequestConfig): AxiosPromise<PagedResultJobHistoryRes> {
+            return localVarFp.searchJobHistory(jobId, jobHistorySearchReq, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2624,15 +2672,16 @@ export class JobHistoryApi extends BaseAPI {
     }
 
     /**
-     * Retrieve the history of job executions based on job ID
-     * @summary Get job history by job ID
+     * Search job histories
+     * @summary search job histories
      * @param {string} jobId 
+     * @param {JobHistorySearchReq} jobHistorySearchReq 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobHistoryApi
      */
-    public getJobHistoryByJobId(jobId: string, options?: RawAxiosRequestConfig) {
-        return JobHistoryApiFp(this.configuration).getJobHistoryByJobId(jobId, options).then((request) => request(this.axios, this.basePath));
+    public searchJobHistory(jobId: string, jobHistorySearchReq: JobHistorySearchReq, options?: RawAxiosRequestConfig) {
+        return JobHistoryApiFp(this.configuration).searchJobHistory(jobId, jobHistorySearchReq, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

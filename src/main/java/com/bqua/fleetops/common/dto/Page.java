@@ -35,14 +35,14 @@ public class Page {
     }
 
     @Schema(hidden = true)
-    public Long getPageTokenNumber() {
+    public Integer getPageTokenNumber() {
         if (StringUtils.isEmpty(pageToken)) {
-            return 0L;
+            return 0;
         }
         try {
-            return Long.parseLong(pageToken);
+            return Integer.parseInt(pageToken);
         } catch (Exception e) {
-            return 0L;
+            return 0;
         }
     }
 

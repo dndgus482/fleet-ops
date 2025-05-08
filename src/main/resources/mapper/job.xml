@@ -42,11 +42,11 @@
         <include refid="jobSearchWhere"/>
         ORDER BY
         <choose>
-            <when test="spec.sort.sortField == 'jobId'">
-                j.job_id ${spec.sort.sortDirection}
+            <when test="spec.sortOption.sortField == 'jobId'">
+                j.job_id ${spec.sortOption.sortDirection}
             </when>
-            <when test="spec.sort.sortField == 'jobName'">
-                j.job_name ${spec.sort.sortDirection}, j.job_id ASC
+            <when test="spec.sortOption.sortField == 'jobName'">
+                j.job_name ${spec.sortOption.sortDirection}, j.job_id ASC
             </when>
         </choose>
         <include refid="com.bqua.fleetops.infrastructure.mybatis.pageClause"/>

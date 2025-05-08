@@ -150,6 +150,33 @@ export function defaultJobHistory(): JobHistory {
   }
 }
 
+export interface SearchJobHistoryReq {
+  filter: SearchJobHistoryFilter,
+  sort: SearchSort,
+  page: Pageable,
+}
+
+export type SearchJobHistoryFilter = {
+  jobId: string
+}
+
+export function defaultSearchJobHistoryReq(): SearchJobHistoryReq {
+  return {
+    filter: {
+      jobId: '',
+    },
+    sort: {
+      sortField: 'jobHistoryNo',
+      sortDirection: SortDirection.DESC,
+    },
+    page: {
+      pageToken: undefined,
+      maxPageSize: 30,
+    },
+  }
+}
+
+
 export interface SimpleJobNameRes {
   jobId: string
   jobName: string
