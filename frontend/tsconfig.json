@@ -12,7 +12,7 @@
     }
   ],
   "compilerOptions": {
-    "strict": false,
+    "strict": true,
     "baseUrl": ".",
     "paths": {
       "@generated/*": ["generated/*"]

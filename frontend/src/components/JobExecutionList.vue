@@ -74,8 +74,8 @@
 
     <SortableTableHeader v-model="sort" :fields="tableHeaders" />
 
-    <div class="overflow-auto max-h-[600px]">
-      <ul ref="jobListRef" class="divide-y divide-gray-100">
+    <div ref="jobListRef" class="overflow-auto max-h-[600px]">
+      <ul class="divide-y divide-gray-100">
         <li
           v-for="jobExecution in fetchedJobExecutions"
           :key="jobExecution.jobExecutionNo"
