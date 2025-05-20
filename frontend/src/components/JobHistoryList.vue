@@ -66,8 +66,8 @@
 
     <SortableTableHeader v-model="sort" :fields="tableHeaders" />
 
-    <div class="overflow-auto max-h-[600px]">
-      <ul ref="historyListRef" class="divide-y divide-gray-100">
+    <div ref="historyListRef" class="overflow-auto max-h-[600px]">
+      <ul class="divide-y divide-gray-100">
         <li
           v-for="jobHistory in fetchedJobHistories"
           :key="jobHistory.jobHistoryNo"
