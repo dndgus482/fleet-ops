@@ -1,62 +1,95 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { ref, useTemplateRef } from 'vue'
-import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+  import type { Agent } from '@/types/agentGroup.ts'
+  import { ref } from 'vue'
+  import { useAgentConnection } from '@/components/AgentDetailSchema.js'
 
-import { type Agent } from '@/types/agentGroup.ts'
-import { agentGroupApi } from '@/api/api.ts'
+  const { ip, userName } = defineProps<{
+    ip: string, userName: string,
+  }>()
 
-
-const route = useRoute()
-const ip = String(route.params.ip)
-const userName = String(route.params.userName)
-
-const agentConnectionDialog = useTemplateRef('agentConnectionDialog')
-
-const currentAgent = ref<Agent>({
-  ip: ip,
-  userName: userName,
-})
-
-async function testConnection() {
-  const agentConnectionRes = (await agentGroupApi.agentConnectionTest([currentAgent.value])).data[0]
-  if (agentConnectionRes.connected) {
-    if (!agentConnectionDialog.value) {
-      return
-    }
-    await agentConnectionDialog.value.reveal()
-  }
-}
-
+  const fetchedAgent = ref<Agent>({
+    ip,
+    userName,
+  })
+  const connection = useAgentConnection(fetchedAgent.value)
 </script>
 
 <template>
-  <div class="p-6 max-w-xl mx-auto bg-white shadow-lg rounded-xl">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-semibold">Agent</h2>
-    </div>
-
-    <div class="space-y-3">
-      <label class="block">IP</label>
-      <input :disabled="true" v-model="currentAgent.ip" class="input-field" />
-
-      <label class="block">UserName</label>
-      <input :disabled="true" v-model="currentAgent.userName" class="input-field" />
-
-      <button
-        @click="testConnection"
-        class="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-100"
+  <n-card class="max-w-xl mx-auto" title="Agent" data-testid="agent-card">
+    <n-space vertical :size="20">
+      <n-descriptions
+        label-placement="left"
+        :column="1"
+        bordered
+        :label-style="{ whiteSpace: 'nowrap', width: 0 }"
+        data-testid="agent-descriptions"
       >
-        연결 테스트
-      </button>
-    </div>
+        <n-descriptions-item label="IP">
+          <span data-testid="agent-ip">{{ fetchedAgent.ip }}</span>
+        </n-descriptions-item>
+        <n-descriptions-item label="User Name">
+          <span data-testid="agent-userName">{{ fetchedAgent.userName }}</span>
+        </n-descriptions-item>
+      </n-descriptions>
 
-    <ConfirmDialog ref="agentConnectionDialog" message="Some agents not connected" />
-  </div>
+      <n-space align="center" data-testid="connection-control">
+        <n-button
+          data-testid="test-connection-btn"
+          @click="connection.execute"
+          strong
+          secondary
+          round
+          type="info"
+          :loading="connection.isLoading.value"
+        >
+          Test Connection
+        </n-button>
+
+        <div
+          v-if="connection.state.value"
+          :class="[
+            'text-sm',
+            connection.statusText.value === 'Success' ? 'text-green-500' :
+            connection.statusText.value === 'Failed' ? 'text-red-500' : 'text-gray-500'
+          ]"
+          data-testid="connection-status"
+        >
+          {{ connection.statusText }}
+        </div>
+      </n-space>
+
+      <n-card embedded v-if="connection.state.value" data-testid="log-card">
+        <n-space
+          justify="space-between"
+          align="center"
+          @click="connection.isLogVisible.value = !connection.isLogVisible.value"
+          data-testid="log-toggle"
+        >
+          <span class="text-sm font-medium text-red-500">Error Log</span>
+          <n-icon size="14">
+            {{ connection.isLogVisible.value ? '▼' : '▶︎' }}
+          </n-icon>
+        </n-space>
+
+        <n-divider v-show="connection.isLogVisible.value" />
+
+        <n-scrollbar
+          v-if="connection.isLogVisible.value"
+          style="max-height: 12rem"
+        >
+          <n-code
+            data-testid="error-log"
+            :code="connection.state.value"
+            class="text-xs"
+            word-wrap
+            show-line-numbers
+            style="max-height: 12rem; overflow: auto;"
+          />
+        </n-scrollbar>
+      </n-card>
+    </n-space>
+  </n-card>
 </template>
 
 <style scoped>
-.input-field {
-  @apply w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
-}
 </style>

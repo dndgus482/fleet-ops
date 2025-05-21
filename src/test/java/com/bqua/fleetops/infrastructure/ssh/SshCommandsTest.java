@@ -1,6 +1,7 @@
 package com.bqua.fleetops.infrastructure.ssh;
 
 import com.bqua.fleetops.common.util.HeredocEscaper;
+import com.bqua.fleetops.infrastructure.ssh.dto.SimpleAppendLogProcessor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

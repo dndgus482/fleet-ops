@@ -1,7 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 .btn-disabled {
-  @apply cursor-not-allowed pointer-events-none;
+    @apply cursor-not-allowed pointer-events-none;
 }

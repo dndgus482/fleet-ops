@@ -46,7 +46,8 @@
 
     <div class="mt-8 space-y-4">
       <template v-for="(value, key) in fetchedJobHistory.history" :key="key">
-        <div v-if="!['jobId', 'jobName', 'jobHistoryNo', 'regUserId', 'regDateTime', 'jobType', 'active'].includes(key)">
+        <div
+          v-if="!['jobId', 'jobName', 'jobHistoryNo', 'regUserId', 'regDateTime', 'jobType', 'active'].includes(key)">
           <label class="block font-semibold mb-1 text-gray-800">{{ key }}</label>
 
           <!-- If SSH script -->
@@ -76,7 +77,4 @@
 </template>
 
 <style scoped>
-  .btn-secondary {
-    @apply px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600;
-  }
 </style>

@@ -1,9 +1,8 @@
 {
-  "files": [],
+  "include": [
+    "*.ts"
+  ],
   "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
     {
       "path": "./tsconfig.app.json"
     },
@@ -12,10 +11,8 @@
     }
   ],
   "compilerOptions": {
-    "strict": true,
-    "baseUrl": ".",
-    "paths": {
-      "@generated/*": ["generated/*"]
-    }
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true
   }
 }

@@ -3,19 +3,21 @@
   import { ref, useTemplateRef } from 'vue'
   import { defaultJob, type Job } from '@/types/job'
   import router from '@/router'
-  import { useMode } from '../composables/useMode'
   import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
   import DropDown from '@/components/ui/DropDown.vue'
   import { jobApi } from '@/api/api.ts'
+  import { useDataMode } from '@/composables/useDataMode'
+  import { useFormMode } from '@/composables/useFormMode'
 
 
   const route = useRoute()
   const jobId = String(route.params.jobId)
 
+  const { mode: dataMode } = useDataMode(() => jobId === 'new')
   const isUpdate = ref(false)
-  const { isCreateMode, isUpdateMode, isReadMode } = useMode({
-    createCondition: () => jobId === 'new',
-    updateCondition: () => isUpdate.value,
+  const { isCreateMode, isUpdateMode, isReadMode } = useFormMode({
+    dataMode: dataMode.value,
+    updateFlag: isUpdate,
   })
   const jobTypes = ref([
     { label: 'SSH', value: 'SSH' },
@@ -186,19 +188,4 @@
 </template>
 
 <style scoped>
-  .btn-primary {
-    @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700;
-  }
-
-  .btn-secondary {
-    @apply bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500;
-  }
-
-  .btn-danger {
-    @apply bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700;
-  }
-
-  .input-field {
-    @apply w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
-  }
 </style>

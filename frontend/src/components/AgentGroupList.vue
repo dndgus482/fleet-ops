@@ -1,31 +1,32 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import router from '@/router'
-import type { AgentGroup } from '@/types/agentGroup.ts'
-import { agentGroupApi } from '@/api/api.ts'
-import { getHashColor } from '@/util/hashColors.ts'
+  import { onMounted, ref } from 'vue'
+  import type { AgentGroup } from '@/types/agentGroup.ts'
+  import { agentGroupApi } from '@/api/api.ts'
+  import { getHashColor } from '@/util/hashColors.ts'
+  import { useRouter } from 'vue-router'
 
-const agentGroups = ref<AgentGroup[]>([])
+  const router = useRouter()
+  const agentGroups = ref<AgentGroup[]>([])
 
-async function pressSwitchActive(agentGroup: AgentGroup) {
-  const res = await agentGroupApi.switchActiveAgentGroup(agentGroup.agentGroupId, { active: !agentGroup.active })
-  agentGroup.active = res.data.active
-}
+  async function pressSwitchActive(agentGroup: AgentGroup) {
+    const res = await agentGroupApi.switchActiveAgentGroup(agentGroup.agentGroupId, { active: !agentGroup.active })
+    agentGroup.active = res.data.active
+  }
 
-async function pressCreate() {
-  await router.push({ name: 'agentGroupDetail', params: { agentGroupId: 'new' } })
-}
+  async function pressCreate() {
+    await router.push({ name: 'agentGroupDetail', params: { agentGroupId: 'new' } })
+  }
 
-async function goToDetail(agentGroupId: string) {
-  await router.push({ name: 'agentGroupDetail', params: { agentGroupId } })
-}
+  async function goToDetail(agentGroupId: string) {
+    await router.push({ name: 'agentGroupDetail', params: { agentGroupId } })
+  }
 
-async function fetchAgentGroups() {
-  const response = await agentGroupApi.getAllAgentGroup()
-  agentGroups.value = response.data
-}
+  async function fetchAgentGroups() {
+    const response = await agentGroupApi.getAllAgentGroup()
+    agentGroups.value = response.data
+  }
 
-onMounted(fetchAgentGroups)
+  onMounted(fetchAgentGroups)
 </script>
 <template>
   <div class="p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-lg relative">
@@ -44,7 +45,8 @@ onMounted(fetchAgentGroups)
         <div class="px-2">Description</div>
       </div>
       <ul class="divide-y divide-gray-100">
-        <li v-for="agentGroup in agentGroups" :key="agentGroup.agentGroupId" @click="goToDetail(agentGroup.agentGroupId)"
+        <li v-for="agentGroup in agentGroups" :key="agentGroup.agentGroupId"
+            @click="goToDetail(agentGroup.agentGroupId)"
             class="bg-gray-50 rounded-lg p-4 mb-3 shadow hover:shadow-md transition cursor-pointer">
           <div class="grid grid-cols-3 items-center text-left border-b border-gray-200 pb-3 mb-3">
             <div class="px-2 flex items-center h-6">
@@ -96,11 +98,4 @@ onMounted(fetchAgentGroups)
   </div>
 </template>
 <style scoped>
-.dot {
-  transition: transform 0.2s ease-in-out;
-}
-
-.translate-x-4 {
-  transform: translateX(1rem);
-}
 </style>
