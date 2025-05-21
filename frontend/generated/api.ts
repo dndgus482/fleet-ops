@@ -2206,7 +2206,7 @@ export const JobExecutionApiAxiosParamCreator = function (configuration?: Config
         /**
          * Search job executions based on given criteria
          * @summary Search job executions
-         * @param {JobExecutionSearchReq} jobExecutionSearchReq Search filters
+         * @param {JobExecutionSearchReq} jobExecutionSearchReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2331,7 +2331,7 @@ export const JobExecutionApiFp = function(configuration?: Configuration) {
         /**
          * Search job executions based on given criteria
          * @summary Search job executions
-         * @param {JobExecutionSearchReq} jobExecutionSearchReq Search filters
+         * @param {JobExecutionSearchReq} jobExecutionSearchReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2400,7 +2400,7 @@ export const JobExecutionApiFactory = function (configuration?: Configuration, b
         /**
          * Search job executions based on given criteria
          * @summary Search job executions
-         * @param {JobExecutionSearchReq} jobExecutionSearchReq Search filters
+         * @param {JobExecutionSearchReq} jobExecutionSearchReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2469,7 +2469,7 @@ export class JobExecutionApi extends BaseAPI {
     /**
      * Search job executions based on given criteria
      * @summary Search job executions
-     * @param {JobExecutionSearchReq} jobExecutionSearchReq Search filters
+     * @param {JobExecutionSearchReq} jobExecutionSearchReq 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobExecutionApi

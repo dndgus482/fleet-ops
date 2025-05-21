@@ -1,24 +1,23 @@
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
+  import { computed, onUnmounted, ref } from 'vue'
   import router from '@/router'
   import {
     defaultJobExecution,
     type JobExecution,
     type SshLiveLog,
   } from '@/types/job.ts'
-  import {
-    subscribeJobExecutionChange,
-    subscribeJobExecutionLogs,
-  } from '@/api/jobExecutionApi.ts'
   import { useRoute } from 'vue-router'
   import { formatDateTime } from '../util/dateTimeFormat.ts'
   import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
   import { templateRef } from '@vueuse/core'
   import { jobExecutionApi } from '@/api/api.ts'
+  import { useStompStore } from '@/stores/useStompSotre.ts'
 
   const route = useRoute()
   const jobId = String(route.params.jobId)
   const jobExecutionNo = Number(route.params.jobExecutionNo)
+
+  const stomp = useStompStore()
 
   const fetchedJobExecution = ref<JobExecution>(defaultJobExecution())
 
@@ -94,13 +93,18 @@
 
   fetchJobExecutions()
 
-  subscribeJobExecutionLogs(jobId, jobExecutionNo, (msg) => {
+  const subscribeJobExecutionLogsRef = stomp.subscribeJobExecutionLogs(jobId, jobExecutionNo, (msg) => {
     setSshLogs([msg])
   })
 
-  subscribeJobExecutionChange(jobId, jobExecutionNo, fetchJobExecutions)
+  const subscribeJobExecutionsChangesRef = stomp.subscribeJobExecutionsChanges(jobId, jobExecutionNo, fetchJobExecutions)
 
   fetchJobExecutionLogs()
+
+  onUnmounted(() => {
+    subscribeJobExecutionLogsRef.unsubscribe()
+    subscribeJobExecutionsChangesRef.unsubscribe()
+  })
 </script>
 
 <template>
