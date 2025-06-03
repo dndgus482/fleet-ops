@@ -1,4 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+  type RouteLocationNormalizedLoadedGeneric,
+} from 'vue-router'
 import JobListView from '@/views/JobListView.vue'
 import JobDetailView from '@/views/JobDetailView.vue'
 import JobExecutionDetailView from '@/views/JobExecutionDetailView.vue'
@@ -52,7 +56,9 @@ const router = createRouter({
       name: 'agentGroupList',
       component: AgentGroupListView,
       props: true,
-      meta: { breadcrumb: 'Agent Group' },
+      meta: {
+        breadcrumb: (_: RouteLocationNormalizedLoadedGeneric) => 'Agent Group',
+      },
     },
     {
       path: '/agentGroups/:agentGroupId',
@@ -60,17 +66,19 @@ const router = createRouter({
       component: AgentGroupDetailView,
       props: true,
       meta: {
-        breadcrumb: (route) => route.params.agentGroupId,
+        breadcrumb: (route: RouteLocationNormalizedLoadedGeneric) =>
+          route.params.agentGroupId,
         parent: 'agentGroupList',
       },
     },
     {
-      path: '/agents/:ip@:userName',
+      path: '/agents/:ip/:userName',
       name: 'agentDetail',
       component: AgentDetailView,
       props: true,
       meta: {
-        breadcrumb: (route) => `Agent - ${route.params.ip} (${route.params.userName})`,
+        breadcrumb: (route: RouteLocationNormalizedLoadedGeneric) =>
+          `Agent - ${route.params.ip} (${route.params.userName})`,
       },
     },
   ],

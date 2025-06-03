@@ -1,10 +1,9 @@
 import { useAsyncState } from '@vueuse/core'
-import { computed, type MaybeRef, watchEffect } from 'vue'
+import { computed, type MaybeRef, ref, toRef, watchEffect } from 'vue'
 import type { Agent } from '@/types/agentGroup.ts'
-import { ref, toRef } from 'vue'
 import { agentGroupApi } from '@/api/api.js'
 
-export type StatusType = {
+type ConnectResult = {
   connected?: boolean
   log?: string
 }
@@ -12,7 +11,7 @@ export type StatusType = {
 export function useAgentConnection(agent: MaybeRef<Agent>) {
   const agentRef = toRef(agent)
 
-  async function test(): Promise<StatusType> {
+  async function test(): Promise<ConnectResult> {
     try {
       const res = await agentGroupApi.agentConnectionTest([agentRef.value])
       return res.data[0]
@@ -21,7 +20,14 @@ export function useAgentConnection(agent: MaybeRef<Agent>) {
     }
   }
 
-  const { execute, isLoading, state } = useAsyncState<StatusType>(test, {}, { immediate: false })
+  const { execute, isLoading, state } = useAsyncState<ConnectResult>(
+    test,
+    {},
+    { immediate: false },
+  )
+  const connected = computed(() => state.value.connected)
+  const log = computed(() => state.value.log)
+
   const isLogVisible = ref(false)
   watchEffect(() => {
     // visible whenever update state
@@ -29,11 +35,5 @@ export function useAgentConnection(agent: MaybeRef<Agent>) {
       isLogVisible.value = true
     }
   })
-  const statusText = computed(() => {
-    return state.value.connected === true ? 'Success' :
-      state.value.connected === false ? 'Failed' :
-        ''
-  })
-
-  return { execute, isLoading, state, isLogVisible, statusText }
+  return { connected, log, execute, isLoading, isLogVisible }
 }

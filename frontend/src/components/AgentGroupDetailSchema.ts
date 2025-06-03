@@ -7,7 +7,8 @@ import { useDebounceField } from '@/composables/useDebounceField'
 import { useControlledField } from '@/composables/useControlledField'
 import { useValidation } from '@/composables/useValidation'
 import { useForm } from 'vee-validate'
-import { NButton, NTag } from 'naive-ui'
+import { NTag } from 'naive-ui'
+import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 
 /**
  * Requirements
@@ -60,10 +61,10 @@ import { NButton, NTag } from 'naive-ui'
  * Save validates all fields; if any are invalid, feedback is shown
  */
 
-
 // ✅ validations
 
-export const agentGroupValidationSchema = toTypedSchema(z.object({
+export const agentGroupValidationSchema = toTypedSchema(
+  z.object({
     agentGroupName: z
       .string()
       .min(1, 'Group name is required')
@@ -79,10 +80,7 @@ export const agentGroupValidationSchema = toTypedSchema(z.object({
       .max(100, 'Tag must be 100 characters or fewer')
       .optional(),
 
-    tags: z
-      .array(z.string())
-      .max(10, 'Maximum 10 tags allowed')
-      .optional(),
+    tags: z.array(z.string()).max(10, 'Maximum 10 tags allowed').optional(),
 
     ipInput: z
       // optional() doesn't work with ip()
@@ -111,26 +109,35 @@ function _validateAddTag(tags: string[], tag: string): string | undefined {
   return undefined
 }
 
-function _validateAddAgent(agents: Agent[], ip: string, userName: string): string | undefined {
+function _validateAddAgent(
+  agents: Agent[],
+  ip: string,
+  userName: string,
+): string | undefined {
   if (!ip || !userName) return 'ip and userName are required'
   if (agents.length >= 100) return 'Maximum 100 agents allowed'
-  if (agents.length > 0 && agents.some(agent => agent.ip === ip && agent.userName === userName)) return 'Agent already exists'
+  if (
+    agents.length > 0 &&
+    agents.some((agent) => agent.ip === ip && agent.userName === userName)
+  )
+    return 'Agent already exists'
   return undefined
 }
 
-
 // ✅ functions
 export async function testAllConnections(agents: Agent[]) {
-  const agentConnectionRes = (await agentGroupApi.agentConnectionTest(agents)).data
+  const agentConnectionRes = (await agentGroupApi.agentConnectionTest(agents))
+    .data
   for (const result of agentConnectionRes) {
-    const target = agents.find(it => it.ip === result.ip && it.userName === result.userName)
+    const target = agents.find(
+      (it) => it.ip === result.ip && it.userName === result.userName,
+    )
     if (target) {
       target.connected = result.connected
       target.log = result.log
     }
   }
 }
-
 
 // ✅ composable
 
@@ -156,7 +163,7 @@ export function useAgentGroupForm() {
         validateField('tags'),
         validateField('agents'),
       ])
-    ).every(v => v.valid)
+    ).every((v) => v.valid)
   }
 
   return { validateForm, meta }
@@ -181,19 +188,17 @@ export function useAgentGroupDescriptionField() {
 }
 
 export function useTagField() {
-  const {
-    value: input,
-    errorMessage: inputError,
-  } = useDebounceField<string>('tagInput')
+  const { value: input, errorMessage: inputError } =
+    useDebounceField<string>('tagInput')
 
-  const {
-    value: tags,
-    errorMessage: tagsError,
-  } = useControlledField<string[]>('tags')
+  const { value: tags, errorMessage: tagsError } =
+    useControlledField<string[]>('tags')
 
-  const { errorMessage: addTagError, validate: validateAddTag } = useValidation(() => {
-    return _validateAddTag(tags.value, input.value)
-  })
+  const { errorMessage: addTagError, validate: validateAddTag } = useValidation(
+    () => {
+      return _validateAddTag(tags.value, input.value)
+    },
+  )
 
   const errorMessage = computed(() => {
     return tagsError.value ?? addTagError.value ?? inputError.value
@@ -237,27 +242,34 @@ export function useAgentField() {
     validate: validateUserNameInput,
   } = useDebounceField<string>('userNameInput')
 
-  const {
-    value: agents,
-    errorMessage: agentError,
-  } = useControlledField<Agent[]>('agents')
+  const { value: agents, errorMessage: agentError } =
+    useControlledField<Agent[]>('agents')
 
-  const { errorMessage: addAgentError, validate: validateAddAgent } = useValidation(() => {
-    return _validateAddAgent(agents.value, ipInput.value, userNameInput.value)
-  })
+  const { errorMessage: addAgentError, validate: validateAddAgent } =
+    useValidation(() => {
+      return _validateAddAgent(agents.value, ipInput.value, userNameInput.value)
+    })
 
   const errorMessage = computed(() => {
-    return agentError.value ?? addAgentError.value ?? ipInputError.value ?? userNameInputError.value
+    return (
+      agentError.value ??
+      addAgentError.value ??
+      ipInputError.value ??
+      userNameInputError.value
+    )
   })
 
   const isAddButtonEnabled = computed(() => {
-    return ipInput.value && userNameInput.value && !errorMessage.value
+    return ipInput.value && userNameInput.value
   })
 
   async function add() {
     userNameInput.value = userNameInput.value.trim()
     ipInput.value = ipInput.value.trim()
-    if (!(await validateIpInput()).valid || !(await validateUserNameInput()).valid) {
+    if (
+      !(await validateIpInput()).valid ||
+      !(await validateUserNameInput()).valid
+    ) {
       return
     }
     if (!validateAddAgent()) {
@@ -270,6 +282,7 @@ export function useAgentField() {
     agents.value.push(agent)
     ipInput.value = ''
     userNameInput.value = ''
+    await testAllConnections()
   }
 
   function remove(index: number) {
@@ -277,9 +290,13 @@ export function useAgentField() {
   }
 
   async function testAllConnections() {
-    const agentConnectionRes = (await agentGroupApi.agentConnectionTest(agents.value)).data
+    const agentConnectionRes = (
+      await agentGroupApi.agentConnectionTest(agents.value)
+    ).data
     for (const result of agentConnectionRes) {
-      const target = agents.value.find(it => it.ip === result.ip && it.userName === result.userName)
+      const target = agents.value.find(
+        (it) => it.ip === result.ip && it.userName === result.userName,
+      )
       if (target) {
         target.connected = result.connected
         target.log = result.log
@@ -290,6 +307,9 @@ export function useAgentField() {
   watch([ipInput, userNameInput], () => {
     if (addAgentError.value) {
       addAgentError.value = undefined
+    }
+    if (agentError.value) {
+      agentError.value = undefined
     }
   })
 
@@ -306,7 +326,6 @@ export function useAgentField() {
     testAllConnections,
   }
 }
-
 
 // ✅ ui
 
@@ -339,21 +358,14 @@ export const agentColumn = {
     },
   }),
   removeColumn: (onClick: (index: number) => void) => ({
-    title: '',
+    title: 'Action',
     render(row: any, index: number) {
-      return h(
-        NButton,
-        {
-          tertiary: true,
-          size: 'small',
-          style: {
-            color: '#888888',
-          },
-          onClick: () => onClick(index),
-        },
-        { default: () => 'Remove' },
-      )
+      return h(BaseIconButton, {
+        size: 'small',
+        bordered: false,
+        icon: 'lucide:trash-2',
+        onClick: () => onClick(index),
+      })
     },
   }),
 }
-

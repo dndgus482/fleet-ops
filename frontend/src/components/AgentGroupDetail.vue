@@ -2,9 +2,8 @@
 import { useRouter } from 'vue-router'
 import { useFormMode } from '@/composables/useFormMode'
 import { type AgentGroup, defaultAgentGroup } from '@/types/agentGroup.ts'
-import { getHashColor } from '@/util/hashColors.ts'
-import { ref, watch } from 'vue'
-import { NButton, NTag, useDialog } from 'naive-ui'
+import { ref, watchEffect } from 'vue'
+import { useDialog } from 'naive-ui'
 import { agentGroupApi } from '@/api/api.ts'
 import { dialogOptions } from '@/components/ui/dialogOptions.ts'
 import {
@@ -14,6 +13,9 @@ import {
 import { DataMode } from '@/composables/useDataMode'
 import AgentGroupDetailEdit from '@/components/AgentGroupDetailEdit.vue'
 import { useAsyncFn } from '@/composables/useAsyncFn'
+import BaseIconButton from '@/components/ui/BaseIconButton.vue'
+import { getHashColor } from '@/util/hashColors.ts'
+import { useAsyncState } from '@vueuse/core'
 
 const { agentGroupId, dataMode } = defineProps<{
   agentGroupId: string
@@ -29,23 +31,19 @@ const { formMode, isCreateMode, isReadMode } = useFormMode({
   updateFlag,
 })
 
-const fetchedAgentGroup = ref<AgentGroup>(defaultAgentGroup())
-const { isReady, execute: fetchAgentGroup } = useAsyncFn(async () => {
-  fetchedAgentGroup.value = (
-    await agentGroupApi.getAgentGroupById(agentGroupId)
-  ).data
+const fetchAgentGroup = useAsyncState<AgentGroup>(
+  async () => (await agentGroupApi.getAgentGroupById(agentGroupId)).data,
+  defaultAgentGroup(),
+  { immediate: false },
+)
+
+const connectionTest = useAsyncFn(async () => {
+  await testAllConnections(fetchAgentGroup.state.value.agents)
 })
 
-const {
-  isLoading: testAllConnectionsLoading,
-  execute: executeTestAllConnections,
-} = useAsyncFn(async () => {
-  await testAllConnections(fetchedAgentGroup.value.agents)
-})
-
-watch(isReady, () => {
-  if (isReady.value) {
-    executeTestAllConnections()
+watchEffect(() => {
+  if (fetchAgentGroup.isReady.value) {
+    connectionTest.execute()
   }
 })
 
@@ -69,7 +67,7 @@ async function save(agentGroupId: string) {
     })
   } else {
     updateFlag.value = false
-    await fetchAgentGroup()
+    await fetchAgentGroup.execute()
   }
 }
 
@@ -87,85 +85,103 @@ async function pressDelete() {
 
 async function deleteAgentGroup() {
   await agentGroupApi.deleteAgentGroupById(agentGroupId)
-  await router.push({ name: 'agentGroupList' })
+  await router.replace({ name: 'agentGroupList' })
 }
 
 if (!isCreateMode.value) {
-  fetchAgentGroup()
+  fetchAgentGroup.execute()
 }
 </script>
 
 <template>
-  <n-card v-if="isReadMode" :title="fetchedAgentGroup.agentGroupName ?? ''">
+  <n-card
+    v-if="isReadMode"
+    :title="fetchAgentGroup.state.value.agentGroupName ?? ''"
+    :segmented="{
+      content: true,
+    }"
+  >
     <template #header-extra>
-      <n-button type="default" @click="pressUpdate" data-testid="updateButton">
-        Edit
-      </n-button>
-      <n-button type="error" @click="pressDelete" data-testid="deleteButton">
-        Delete
-      </n-button>
+      <div class="flex gap-2">
+        <base-icon-button
+          type="default"
+          secondary
+          @click="pressUpdate"
+          data-testid="updateButton"
+          icon="lucide:pencil"
+        >
+          Edit
+        </base-icon-button>
+        <base-icon-button
+          type="error"
+          secondary
+          @click="pressDelete"
+          data-testid="deleteButton"
+          icon="lucide:trash-2"
+        >
+          Delete
+        </base-icon-button>
+      </div>
     </template>
-    <n-form v-if="isReady">
-      <n-form-item label="Group Description">
-        <n-input
-          readonly
-          type="textarea"
-          v-model:value="fetchedAgentGroup.agentGroupDescription"
-          data-testid="agentGroupDescriptionInput"
-        />
-      </n-form-item>
-      <n-form-item label="Tags">
+
+    <!-- Group Description -->
+    <n-thing v-if="fetchAgentGroup.isReady.value">
+      <template #header>Group Description</template>
+      <div class="whitespace-pre-wrap">
+        {{ fetchAgentGroup.state.value.agentGroupDescription }}
+      </div>
+    </n-thing>
+    <n-skeleton v-else text />
+    <n-divider />
+
+    <!-- Tags -->
+    <n-thing v-if="fetchAgentGroup.isReady.value">
+      <template #header>Tags</template>
+      <div class="flex gap-2">
         <n-tag
-          v-for="(tag, index) in fetchedAgentGroup.tags"
+          v-for="(tag, index) in fetchAgentGroup.state.value.tags"
           :key="tag + index"
           :bordered="false"
-          :style="{ backgroundColor: getHashColor(tag) }"
+          :color="{ color: getHashColor(tag) }"
           type="default"
         >
           {{ tag }}
         </n-tag>
-      </n-form-item>
-      <n-form-item label="Agents">
-        <n-space vertical class="w-full">
-          <div class="flex justify-end">
-            <n-button
-              size="small"
-              @click="executeTestAllConnections()"
-              :loading="testAllConnectionsLoading"
-            >
-              Connection Test
-            </n-button>
-          </div>
-          <n-data-table
-            :columns="[
-              agentColumn.logColumn(),
-              agentColumn.ipColumn(),
-              agentColumn.userNameColumn(),
-              agentColumn.statusColumn(),
-            ]"
-            :data="fetchedAgentGroup.agents"
-          />
-        </n-space>
-      </n-form-item>
-    </n-form>
-    <n-form v-else>
-      <n-skeleton text :repeat="1" style="width: 200px; height: 32px" />
-      <n-form-item label="Group Description">
-        <n-skeleton text :repeat="4" />
-      </n-form-item>
-      <n-form-item label="Tags">
-        <n-space wrap>
-          <n-skeleton v-for="i in 3" :key="i" :width="60" :height="24" />
-        </n-space>
-      </n-form-item>
-      <n-form-item label="Agents">
-        <n-skeleton text :repeat="6" />
-      </n-form-item>
-    </n-form>
+      </div>
+    </n-thing>
+    <n-skeleton v-else />
+    <n-divider />
+
+    <!-- Agents -->
+    <n-thing v-if="fetchAgentGroup.isReady.value">
+      <template #header>Agents</template>
+      <template #header-extra>
+        <base-icon-button
+          size="small"
+          @click="connectionTest.execute()"
+          :loading="connectionTest.isLoading.value"
+          icon="lucide:activity"
+        >
+          Connection Test
+        </base-icon-button>
+      </template>
+      <n-space vertical class="w-full">
+        <n-data-table
+          :columns="[
+            agentColumn.logColumn(),
+            agentColumn.ipColumn(),
+            agentColumn.userNameColumn(),
+            agentColumn.statusColumn(),
+          ]"
+          :data="fetchAgentGroup.state.value.agents"
+        />
+      </n-space>
+    </n-thing>
+    <n-skeleton v-else />
   </n-card>
-  <AgentGroupDetailEdit
+  <agent-group-detail-edit
     v-else
-    :agent-group="fetchedAgentGroup"
+    :agent-group="fetchAgentGroup.state.value"
     :form-mode="formMode"
     @cancel="cancel"
     @save="save"

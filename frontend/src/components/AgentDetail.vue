@@ -1,28 +1,41 @@
 <script setup lang="ts">
-  import type { Agent } from '@/types/agentGroup.ts'
-  import { ref } from 'vue'
-  import { useAgentConnection } from '@/components/AgentDetailSchema.js'
+import type { Agent } from '@/types/agentGroup.ts'
+import { ref, watchEffect } from 'vue'
+import { useAgentConnection } from '@/components/AgentDetailSchema.js'
+import { CaretForwardOutline } from '@vicons/ionicons5'
 
-  const { ip, userName } = defineProps<{
-    ip: string, userName: string,
-  }>()
+const { ip, userName } = defineProps<{
+  ip: string
+  userName: string
+}>()
 
-  const fetchedAgent = ref<Agent>({
-    ip,
-    userName,
-  })
-  const connection = useAgentConnection(fetchedAgent.value)
+const fetchedAgent = ref<Agent>({
+  ip,
+  userName,
+})
+const connection = useAgentConnection(fetchedAgent.value)
+
+const toggleErrorLog = ref<'errorLog' | ''>('errorLog')
+
+watchEffect(() => {
+  if (!connection.isLoading.value && connection.isLogVisible.value) {
+    toggleErrorLog.value = 'errorLog'
+  }
+})
+
+const handleItemHeaderClick = () => {
+  toggleErrorLog.value = toggleErrorLog.value === 'errorLog' ? '' : 'errorLog'
+}
 </script>
 
 <template>
-  <n-card class="max-w-xl mx-auto" title="Agent" data-testid="agent-card">
-    <n-space vertical :size="20">
+  <n-card title="Agent">
+    <div class="flex flex-col gap-2">
       <n-descriptions
         label-placement="left"
         :column="1"
         bordered
-        :label-style="{ whiteSpace: 'nowrap', width: 0 }"
-        data-testid="agent-descriptions"
+        label-class="whitespace-nowrap w-0"
       >
         <n-descriptions-item label="IP">
           <span data-testid="agent-ip">{{ fetchedAgent.ip }}</span>
@@ -32,64 +45,54 @@
         </n-descriptions-item>
       </n-descriptions>
 
-      <n-space align="center" data-testid="connection-control">
+      <div class="flex items-center gap-2">
         <n-button
           data-testid="test-connection-btn"
           @click="connection.execute"
           strong
           secondary
           round
-          type="info"
+          type="primary"
           :loading="connection.isLoading.value"
         >
+          <template #icon>
+            <n-icon>
+              <CaretForwardOutline />
+            </n-icon>
+          </template>
           Test Connection
         </n-button>
 
-        <div
-          v-if="connection.state.value"
+        <span
+          v-if="connection.connected.value !== undefined"
           :class="[
-            'text-sm',
-            connection.statusText.value === 'Success' ? 'text-green-500' :
-            connection.statusText.value === 'Failed' ? 'text-red-500' : 'text-gray-500'
+            connection.connected.value ? 'text-green-500' : 'text-red-500',
           ]"
           data-testid="connection-status"
         >
-          {{ connection.statusText }}
-        </div>
-      </n-space>
+          {{ connection.connected.value ? 'Success' : 'Failed' }}
+        </span>
+      </div>
 
-      <n-card embedded v-if="connection.state.value" data-testid="log-card">
-        <n-space
-          justify="space-between"
-          align="center"
-          @click="connection.isLogVisible.value = !connection.isLogVisible.value"
-          data-testid="log-toggle"
+      <n-card embedded v-if="connection.isLogVisible.value">
+        <n-collapse
+          :expanded-names="toggleErrorLog"
+          @item-header-click="handleItemHeaderClick"
         >
-          <span class="text-sm font-medium text-red-500">Error Log</span>
-          <n-icon size="14">
-            {{ connection.isLogVisible.value ? '▼' : '▶︎' }}
-          </n-icon>
-        </n-space>
-
-        <n-divider v-show="connection.isLogVisible.value" />
-
-        <n-scrollbar
-          v-if="connection.isLogVisible.value"
-          style="max-height: 12rem"
-        >
-          <n-code
-            data-testid="error-log"
-            :code="connection.state.value"
-            class="text-xs"
-            word-wrap
-            show-line-numbers
-            style="max-height: 12rem; overflow: auto;"
-          />
-        </n-scrollbar>
+          <n-collapse-item name="errorLog" data-testid="log-toggle">
+            <template #header>
+              <span class="text-red-500">Error Log</span>
+            </template>
+            <n-scrollbar v-if="connection.isLogVisible.value">
+              <n-code
+                data-testid="error-log"
+                :code="connection.log.value"
+                word-wrap
+              />
+            </n-scrollbar>
+          </n-collapse-item>
+        </n-collapse>
       </n-card>
-    </n-space>
+    </div>
   </n-card>
 </template>
-
-<style scoped>
-</style>

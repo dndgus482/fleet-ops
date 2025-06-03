@@ -25,4 +25,3 @@ export function getHashColor(tag: string): string {
   const index = Math.abs(hash) % tagColors.length
   return tagColors[index]
 }
-
