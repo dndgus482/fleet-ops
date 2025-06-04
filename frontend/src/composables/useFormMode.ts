@@ -4,15 +4,12 @@ import { DataMode } from '@/composables/useDataMode'
 export enum FormMode {
   CREATE = 'CREATE',
   UPDATE = 'UPDATE',
-  READ = 'READ'
+  READ = 'READ',
 }
 
-export function useFormMode({ dataMode, updateFlag }: {
-  dataMode: DataMode,
-  updateFlag: Ref<boolean>
-}) {
+export function useFormMode(dataMode: Ref<DataMode>, updateFlag: Ref<boolean>) {
   const mode = computed(() => {
-    if (dataMode === DataMode.NEW) return FormMode.CREATE
+    if (dataMode.value === DataMode.NEW) return FormMode.CREATE
     return updateFlag.value ? FormMode.UPDATE : FormMode.READ
   })
 

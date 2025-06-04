@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FormMode } from '@/composables/useFormMode'
-import { type AgentGroup } from '@/types/agentGroup.ts'
+import { type AgentGroup, defaultAgentGroup } from '@/types/agentGroup.ts'
 import { getHashColor } from '@/util/hashColors.ts'
 import { NButton, NTag, useDialog } from 'naive-ui'
 import { agentGroupApi } from '@/api/api.ts'
@@ -17,8 +17,10 @@ import {
 import type { SaveAgentGroupReq } from '@generated/api.ts'
 import { useAsyncFn } from '@/composables/useAsyncFn.ts'
 import BaseIconButton from '@/components/ui/BaseIconButton.vue'
+import { watchEffect } from 'vue'
 
-const { agentGroup, formMode } = defineProps<{
+// props, emits
+const { agentGroup = defaultAgentGroup(), formMode } = defineProps<{
   agentGroup: AgentGroup
   formMode: FormMode
 }>()
@@ -28,16 +30,34 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-const isUpdateMode = formMode === FormMode.UPDATE
-
+// external resources
 const dialog = useDialog()
 
+// reactive states
 const form = useAgentGroupForm()
 const agentGroupNameField = useAgentGroupNameField()
 const agentGroupDescriptionField = useAgentGroupDescriptionField()
 const tagField = useTagField()
 const agentField = useAgentField()
 
+// core functions
+const loadField = (agentGroup: AgentGroup) => {
+  agentGroupNameField.input.value = agentGroup.agentGroupName
+  agentGroupDescriptionField.input.value = agentGroup.agentGroupDescription
+  tagField.tags.value = agentGroup.tags
+  agentField.agents.value = agentGroup.agents
+}
+
+const toPayload = (): SaveAgentGroupReq => {
+  return {
+    agentGroupName: agentGroupNameField.input.value,
+    agentGroupDescription: agentGroupDescriptionField.input.value,
+    tags: tagField.tags.value,
+    agents: agentField.agents.value,
+  }
+}
+
+// event handlers
 const pressCancel = async () => {
   emit('cancel')
 }
@@ -45,9 +65,13 @@ const pressCancel = async () => {
 const saveAgentGroup = useAsyncFn(async () => {
   const {
     data: { agentGroupId },
-  } = isUpdateMode
-    ? await agentGroupApi.updateAgentGroup(agentGroup.agentGroupId, toPayload())
-    : await agentGroupApi.createAgentGroup(toPayload())
+  } =
+    formMode === FormMode.UPDATE
+      ? await agentGroupApi.updateAgentGroup(
+          agentGroup.agentGroupId,
+          toPayload(),
+        )
+      : await agentGroupApi.createAgentGroup(toPayload())
 
   emit('save', agentGroupId)
 })
@@ -66,23 +90,10 @@ const pressSave = async () => {
   })
 }
 
-function loadField(agentGroup: AgentGroup) {
-  agentGroupNameField.input.value = agentGroup.agentGroupName
-  agentGroupDescriptionField.input.value = agentGroup.agentGroupDescription
-  tagField.tags.value = agentGroup.tags
-  agentField.agents.value = agentGroup.agents
-}
-
-function toPayload(): SaveAgentGroupReq {
-  return {
-    agentGroupName: agentGroupNameField.input.value,
-    agentGroupDescription: agentGroupDescriptionField.input.value,
-    tags: tagField.tags.value,
-    agents: agentField.agents.value,
-  }
-}
-
-loadField(agentGroup)
+// side effects
+watchEffect(() => {
+  loadField(agentGroup)
+})
 </script>
 
 <template>

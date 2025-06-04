@@ -1,35 +1,36 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import router from '@/router'
 import type { SimpleJobNameRes } from '@/types/job.ts'
-import { useRoute } from 'vue-router'
 import { agentGroupApi } from '@/api/api.ts'
+import { useAsyncState } from '@vueuse/core'
 
-const route = useRoute()
-const agentGroupId = String(route.params.agentGroupId)
+const { agentGroupId } = defineProps<{
+  agentGroupId: string
+}>()
 
-const jobs = ref<SimpleJobNameRes[]>([])
+const fetchJob = useAsyncState<SimpleJobNameRes[]>(
+  async () => (await agentGroupApi.getAgentGroupLinkedJobs(agentGroupId)).data,
+  [],
+)
 
-async function goToJob(jobId: string) {
+const goToJob = async (jobId: string) => {
   await router.push({ name: 'jobDetail', params: { jobId: jobId } })
 }
-
-async function fetchLinkedJobs() {
-  jobs.value = (await agentGroupApi.getAgentGroupLinkedJobs(agentGroupId)).data
-}
-
-onMounted(fetchLinkedJobs)
 </script>
 
 <template>
   <n-card title="Linked Jobs">
     <n-list hoverable clickable>
+      <template v-if="fetchJob.state.value.length === 0">
+        No Linked Jobs
+      </template>
       <n-list-item
-        v-for="job in jobs"
+        v-for="job in fetchJob.state.value"
         :key="job.jobId"
         @click="goToJob(job.jobId)"
-        >{{ job.jobName }}</n-list-item
       >
+        {{ job.jobName }}
+      </n-list-item>
     </n-list>
   </n-card>
 </template>

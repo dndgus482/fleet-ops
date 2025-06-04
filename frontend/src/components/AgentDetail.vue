@@ -2,7 +2,7 @@
 import type { Agent } from '@/types/agentGroup.ts'
 import { ref, watchEffect } from 'vue'
 import { useAgentConnection } from '@/components/AgentDetailSchema.js'
-import { CaretForwardOutline } from '@vicons/ionicons5'
+import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 
 const { ip, userName } = defineProps<{
   ip: string
@@ -46,22 +46,16 @@ const handleItemHeaderClick = () => {
       </n-descriptions>
 
       <div class="flex items-center gap-2">
-        <n-button
+        <base-icon-button
           data-testid="test-connection-btn"
           @click="connection.execute"
-          strong
           secondary
-          round
           type="primary"
           :loading="connection.isLoading.value"
+          icon="lucide:activity"
         >
-          <template #icon>
-            <n-icon>
-              <CaretForwardOutline />
-            </n-icon>
-          </template>
           Test Connection
-        </n-button>
+        </base-icon-button>
 
         <span
           v-if="connection.connected.value !== undefined"

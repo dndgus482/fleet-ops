@@ -1,18 +1,17 @@
-import { computed, ref, watchEffect } from 'vue'
+import { computed, type ComputedRef, ref, watchEffect } from 'vue'
 
 export enum DataMode {
   NEW = 'NEW',
-  EXISTING = 'EXISTING'
+  EXISTING = 'EXISTING',
 }
 
-export function useDataMode(newCondition: () => boolean) {
+export function useDataMode(newCondition: ComputedRef<boolean>) {
   const mode = ref<DataMode>(
-    newCondition() ? DataMode.NEW : DataMode.EXISTING,
+    newCondition.value ? DataMode.NEW : DataMode.EXISTING,
   )
 
   watchEffect(() => {
-    if (newCondition()) mode.value = DataMode.NEW
-    else mode.value = DataMode.EXISTING
+    mode.value = newCondition.value ? DataMode.NEW : DataMode.EXISTING
   })
 
   const isNewMode = computed(() => {

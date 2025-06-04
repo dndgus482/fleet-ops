@@ -126,6 +126,9 @@ function _validateAddAgent(
 
 // ✅ functions
 export async function testAllConnections(agents: Agent[]) {
+  if (agents.length === 0) {
+    return
+  }
   const agentConnectionRes = (await agentGroupApi.agentConnectionTest(agents))
     .data
   for (const result of agentConnectionRes) {
@@ -282,26 +285,15 @@ export function useAgentField() {
     agents.value.push(agent)
     ipInput.value = ''
     userNameInput.value = ''
-    await testAllConnections()
+    await executeTestAllConnections()
   }
 
   function remove(index: number) {
     agents.value.splice(index, 1)
   }
 
-  async function testAllConnections() {
-    const agentConnectionRes = (
-      await agentGroupApi.agentConnectionTest(agents.value)
-    ).data
-    for (const result of agentConnectionRes) {
-      const target = agents.value.find(
-        (it) => it.ip === result.ip && it.userName === result.userName,
-      )
-      if (target) {
-        target.connected = result.connected
-        target.log = result.log
-      }
-    }
+  async function executeTestAllConnections() {
+    await testAllConnections(agents.value)
   }
 
   watch([ipInput, userNameInput], () => {
@@ -323,7 +315,7 @@ export function useAgentField() {
     isAddButtonEnabled,
     add,
     remove,
-    testAllConnections,
+    testAllConnections: executeTestAllConnections,
   }
 }
 

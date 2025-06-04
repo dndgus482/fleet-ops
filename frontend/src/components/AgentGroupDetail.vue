@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useFormMode } from '@/composables/useFormMode'
 import { type AgentGroup, defaultAgentGroup } from '@/types/agentGroup.ts'
-import { ref, watchEffect } from 'vue'
+import { ref, toRef, watchEffect } from 'vue'
 import { useDialog } from 'naive-ui'
 import { agentGroupApi } from '@/api/api.ts'
 import { dialogOptions } from '@/components/ui/dialogOptions.ts'
@@ -17,25 +17,30 @@ import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 import { getHashColor } from '@/util/hashColors.ts'
 import { useAsyncState } from '@vueuse/core'
 
-const { agentGroupId, dataMode } = defineProps<{
+const props = defineProps<{
   agentGroupId: string
   dataMode: DataMode
 }>()
+const agentGroupId = toRef(props, 'agentGroupId')
+const dataMode = toRef(props, 'dataMode')
 
 const router = useRouter()
 const dialog = useDialog()
 
 const updateFlag = ref(false)
-const { formMode, isCreateMode, isReadMode } = useFormMode({
-  dataMode,
-  updateFlag,
-})
+const { formMode, isCreateMode, isReadMode } = useFormMode(dataMode, updateFlag)
 
 const fetchAgentGroup = useAsyncState<AgentGroup>(
-  async () => (await agentGroupApi.getAgentGroupById(agentGroupId)).data,
+  async () => (await agentGroupApi.getAgentGroupById(agentGroupId.value)).data,
   defaultAgentGroup(),
   { immediate: false },
 )
+
+watchEffect(() => {
+  if (!isCreateMode.value && agentGroupId.value) {
+    fetchAgentGroup.execute()
+  }
+})
 
 const connectionTest = useAsyncFn(async () => {
   await testAllConnections(fetchAgentGroup.state.value.agents)
@@ -61,10 +66,7 @@ function cancel() {
 
 async function save(agentGroupId: string) {
   if (isCreateMode.value) {
-    await router.replace({
-      name: 'agentGroupDetail',
-      params: { agentGroupId },
-    })
+    await router.replace({ name: 'agentGroupDetail', params: { agentGroupId } })
   } else {
     updateFlag.value = false
     await fetchAgentGroup.execute()
@@ -84,12 +86,8 @@ async function pressDelete() {
 }
 
 async function deleteAgentGroup() {
-  await agentGroupApi.deleteAgentGroupById(agentGroupId)
+  await agentGroupApi.deleteAgentGroupById(agentGroupId.value)
   await router.replace({ name: 'agentGroupList' })
-}
-
-if (!isCreateMode.value) {
-  fetchAgentGroup.execute()
 }
 </script>
 
