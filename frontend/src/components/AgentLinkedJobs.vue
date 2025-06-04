@@ -1,33 +1,34 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { agentGroupApi } from '@/api/api.ts'
 import type { SimpleJobNameRes } from '@/types/job.ts'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { useAsyncState } from '@vueuse/core'
 
-const route = useRoute()
+const { ip, userName } = defineProps<{
+  ip: string
+  userName: string
+}>()
+
 const router = useRouter()
-const ip = String(route.params.ip)
-const userName = String(route.params.userName)
 
-const jobs = ref<SimpleJobNameRes[]>([])
+const fetchJob = useAsyncState<SimpleJobNameRes[]>(
+  async () => (await agentGroupApi.getAgentLinkedJobs({ ip, userName })).data,
+  [],
+)
 
-async function goToJob(jobId: string) {
+const goToJob = async (jobId: string) => {
   await router.push({ name: 'jobDetail', params: { jobId } })
 }
-
-async function fetchLinkedJobs() {
-  const res = await agentGroupApi.getAgentLinkedJobs({ ip, userName })
-  jobs.value = res.data
-}
-
-fetchLinkedJobs()
 </script>
 
 <template>
-  <n-card title="Linked Job List" class="mx-auto max-w-4xl">
+  <n-card title="Linked Job List">
     <n-list hoverable clickable data-testid="job-list">
+      <template v-if="fetchJob.state.value.length === 0">
+        No Linked Jobs
+      </template>
       <n-list-item
-        v-for="job in jobs"
+        v-for="job in fetchJob.state.value"
         :key="job.jobId"
         :data-testid="`job-${job.jobId}`"
         @click="goToJob(job.jobId)"

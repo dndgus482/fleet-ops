@@ -35,9 +35,6 @@ vi.spyOn(agentGroupApi, 'getAgentLinkedJobs').mockResolvedValue({
 
 const pushMock = vi.fn()
 vi.mock('vue-router', () => ({
-  useRoute: () => ({
-    params: AGENT,
-  }),
   useRouter: () => ({
     push: pushMock,
   }),
@@ -47,7 +44,7 @@ vi.mock('vue-router', () => ({
 // ✅ test cases
 describe('AgentLinkedJobs.vue', () => {
   it('renders job list from API', async () => {
-    const wrapper = mount(AgentLinkedJobs)
+    const wrapper = mount(AgentLinkedJobs, {props: AGENT})
     await flushPromises()
 
     const list = wrapper.get(TESTID.list)
@@ -57,7 +54,7 @@ describe('AgentLinkedJobs.vue', () => {
   })
 
   it('navigates to job detail when clicked', async () => {
-    const wrapper = mount(AgentLinkedJobs)
+    const wrapper = mount(AgentLinkedJobs, {props: AGENT})
     await flushPromises()
 
     const item = wrapper.get(TESTID.job(MOCK_JOB_ID.first))

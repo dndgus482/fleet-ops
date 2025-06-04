@@ -7,8 +7,8 @@ import { useDebounceField } from '@/composables/useDebounceField'
 import { useControlledField } from '@/composables/useControlledField'
 import { useValidation } from '@/composables/useValidation'
 import { useForm } from 'vee-validate'
-import { NTag } from 'naive-ui'
 import BaseIconButton from '@/components/ui/BaseIconButton.vue'
+import { NTag } from 'naive-ui'
 
 /**
  * Requirements
