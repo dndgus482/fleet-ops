@@ -1,6 +1,0 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
-
-.btn-hoverable {
-    @apply hover:bg-current/10 transition duration-200;
-}
