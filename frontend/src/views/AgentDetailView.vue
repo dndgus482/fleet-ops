@@ -11,9 +11,9 @@ const { ip, userName } = defineProps<{
 <template>
   <main>
     <div class="flex flex-col items-center">
-      <agent-detail :ip="ip" :userName="userName" />
+      <agent-detail :ip="ip" :user-name="userName" />
       <n-divider />
-      <agent-linked-jobs />
+      <agent-linked-jobs :ip="ip" :user-name="userName" />
     </div>
   </main>
 </template>

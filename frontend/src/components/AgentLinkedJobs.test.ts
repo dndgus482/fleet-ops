@@ -13,7 +13,7 @@ const MOCK_JOB_ID = {
   second: 'job-2',
 }
 
-const AGENT = {
+const PROPS = {
   ip: '127.0.0.1',
   userName: MOCK_JOB_ID.first,
 }
@@ -44,7 +44,7 @@ vi.mock('vue-router', () => ({
 // ✅ test cases
 describe('AgentLinkedJobs.vue', () => {
   it('renders job list from API', async () => {
-    const wrapper = mount(AgentLinkedJobs, {props: AGENT})
+    const wrapper = mount(AgentLinkedJobs, {props: PROPS})
     await flushPromises()
 
     const list = wrapper.get(TESTID.list)
@@ -54,7 +54,7 @@ describe('AgentLinkedJobs.vue', () => {
   })
 
   it('navigates to job detail when clicked', async () => {
-    const wrapper = mount(AgentLinkedJobs, {props: AGENT})
+    const wrapper = mount(AgentLinkedJobs, {props: PROPS})
     await flushPromises()
 
     const item = wrapper.get(TESTID.job(MOCK_JOB_ID.first))
