@@ -5,12 +5,16 @@
 
   const menuOptions: MenuOption[] = [
     {
+      label: 'Agent Groups',
+      key: '/agentGroups',
+    },
+    {
       label: 'Jobs',
       key: '/jobs',
     },
     {
-      label: 'Agent Groups',
-      key: '/agentGroups',
+      label: 'Job Executions',
+      key: '/jobExecutions',
     },
   ]
 

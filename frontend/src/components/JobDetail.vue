@@ -1,237 +1,199 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { computed, ref, useTemplateRef } from 'vue'
+import { ref, toRef, watchEffect } from 'vue'
 import { defaultJob, type Job } from '@/types/job'
-import router from '@/router'
-import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
-import DropDown from '@/components/ui/DropDown.vue'
 import { jobApi } from '@/api/api.ts'
-import { useDataMode } from '@/composables/useDataMode'
+import { DataMode } from '@/composables/useDataMode'
 import { useFormMode } from '@/composables/useFormMode'
+import BaseIconButton from '@/components/ui/BaseIconButton.vue'
+import { useAsyncState } from '@vueuse/core'
+import { useDialog } from 'naive-ui'
+import { dialogOptions } from '@/components/ui/dialogOptions.ts'
+import { useRouter } from 'vue-router'
+import { jobColumn } from '@/components/JobDetailSchema.ts'
+import JobDetailEdit from '@/components/JobDetailEdit.vue'
 
-const route = useRoute()
-const jobId = String(route.params.jobId)
+const props = defineProps<{
+  jobId: string
+  dataMode: DataMode
+}>()
+const jobId = toRef(props, 'jobId')
+const dataMode = toRef(props, 'dataMode')
 
-const { mode: dataMode } = useDataMode(computed(() => jobId === 'new'))
-const isUpdate = ref(false)
-const { isCreateMode, isUpdateMode, isReadMode } = useFormMode({
-  dataMode: dataMode.value,
-  updateFlag: isUpdate,
+const router = useRouter()
+const dialog = useDialog()
+
+const updateFlag = ref(false)
+const { formMode, isCreateMode, isReadMode } = useFormMode(dataMode, updateFlag)
+
+const fetchJob = useAsyncState<Job>(
+  async () => (await jobApi.getJobById(jobId.value)).data,
+  defaultJob(),
+  { immediate: true },
+)
+
+watchEffect(() => {
+  if (!isCreateMode.value && jobId.value) {
+    fetchJob.execute()
+  }
 })
-const jobTypes = ref([{ label: 'SSH', value: 'SSH' }])
-
-const saveDialog = useTemplateRef('saveDialog')
-const deleteDialog = useTemplateRef('deleteDialog')
-
-const currentJob = ref<Job>(defaultJob())
-const fetchedJob = ref<Job | null>(null)
 
 function pressUpdate() {
-  isUpdate.value = true
+  updateFlag.value = true
 }
 
-function pressCancel() {
+function cancel() {
   if (isCreateMode.value) {
     router.back()
   } else {
-    isUpdate.value = false
+    updateFlag.value = false
   }
 }
 
-async function pressSave() {
-  if (!saveDialog.value) {
-    return
+async function save(jobId: string) {
+  if (isCreateMode.value) {
+    await router.replace({ name: 'jobDetail', params: { jobId } })
+  } else {
+    updateFlag.value = false
+    await fetchJob.execute()
   }
-  const result = await saveDialog.value.reveal()
-  if (result.isCanceled) {
-    return
-  }
-  await saveJob()
+}
+
+async function deleteJob() {
+  await jobApi.deleteJobById(jobId.value)
+  await router.replace({ name: 'jobList' })
 }
 
 async function pressDelete() {
-  if (!deleteDialog.value) {
-    return
-  }
-  const result = await deleteDialog.value.reveal()
-  if (result.isCanceled) {
-    return
-  }
-  await deleteJob()
+  dialog.create({
+    ...dialogOptions,
+    type: 'error',
+    title: 'Confirm Delete',
+    content: 'Are you sure you want to delete?',
+    negativeText: 'Cancel',
+    positiveText: 'Delete',
+    onPositiveClick: deleteJob,
+  })
 }
 
 async function pressJobExecutions() {
   await router.push({
     name: 'jobExecutionList',
     query: {
-      jobId: jobId,
+      jobId: jobId.value,
     },
   })
 }
 
-async function pressJobHistory() {
-  await router.push({ name: 'jobHistoryList', params: { jobId } })
-}
-
-async function fetchJob() {
-  const job = (await jobApi.getJobById(jobId)).data
-  fetchedJob.value = job
-  currentJob.value = job
-}
-
-async function saveJob() {
-  if (isUpdateMode.value) {
-    await jobApi.updateJob(jobId, currentJob.value)
-  } else {
-    await jobApi.createJob(currentJob.value)
-  }
-  await router.push({ name: 'jobList' })
-}
-
-async function deleteJob() {
-  await jobApi.deleteJobById(currentJob.value.jobId)
-  await router.push({ name: 'jobList' })
-}
-
-const newAgentUser = ref('')
-const newAgentIp = ref('')
-
-function addAgent() {
-  if (newAgentUser.value.trim() && newAgentIp.value.trim()) {
-    if (!currentJob.value.targetAgents) {
-      currentJob.value.targetAgents = []
-    }
-    currentJob.value.targetAgents?.push({
-      targetAgentType: 'AGENT',
-      ip: newAgentIp.value.trim(),
-      userName: newAgentUser.value.trim(),
-    })
-    newAgentUser.value = ''
-    newAgentIp.value = ''
-  }
-}
-
-function removeAgent(index: number) {
-  currentJob.value.targetAgents?.splice(index, 1)
-}
-
-if (isReadMode.value) {
-  fetchJob()
+async function pressJobHistories() {
+  await router.push({ name: 'jobHistoryList', params: { jobId: jobId.value } })
 }
 </script>
 
 <template>
-  <div class="mx-auto max-w-xl rounded-xl bg-white p-6 shadow-lg">
-    <div class="mb-4 flex items-center justify-between">
-      <h2 class="text-xl font-semibold">Job Editor</h2>
-      <div class="space-x-2">
-        <button v-if="isReadMode" @click="pressUpdate" class="btn-primary">
-          Edit
-        </button>
-        <button v-if="isReadMode" @click="pressDelete" class="btn-danger">
-          Delete
-        </button>
-        <button
-          v-if="isReadMode"
+  <n-card
+    v-if="isReadMode"
+    :title="fetchJob.state.value.jobName ?? ''"
+  >
+    <template #header-extra>
+      <div class="flex gap-2">
+        <base-icon-button
+          type="default"
+          secondary
+          @click="pressJobHistories"
+          data-testid="jobHistoriesButton"
+          icon="lucide:history"
+        >
+          Change History
+        </base-icon-button>
+        <base-icon-button
+          type="default"
+          secondary
           @click="pressJobExecutions"
-          class="btn-secondary"
+          data-testid="jobExecutionsButton"
+          icon="lucide:list"
         >
-          Executions
-        </button>
-        <button
-          v-if="isReadMode"
-          @click="pressJobHistory"
-          class="btn-secondary"
+          Execution Records
+        </base-icon-button>
+        <base-icon-button
+          type="default"
+          secondary
+          @click="pressUpdate"
+          data-testid="updateButton"
+          icon="lucide:pencil"
         >
-          Job History
-        </button>
+          Edit
+        </base-icon-button>
+        <base-icon-button
+          type="error"
+          secondary
+          @click="pressDelete"
+          data-testid="deleteButton"
+          icon="lucide:trash-2"
+        >
+          Delete
+        </base-icon-button>
       </div>
-    </div>
-
-    <div class="space-y-3">
-      <label class="block">Job Name</label>
-      <input
-        :disabled="isReadMode"
-        v-model="currentJob.jobName"
-        class="input-field"
-      />
-
-      <label class="block">Job Description</label>
-      <textarea
-        :disabled="isReadMode"
-        v-model="currentJob.jobDescription"
-        class="input-field h-24"
-      ></textarea>
-
-      <label class="block">Job Type</label>
-      <DropDown
-        :disabled="isReadMode"
-        v-model="currentJob.jobType"
-        :options="jobTypes"
-      />
-
-      <label class="block">Target Agents</label>
-      <div class="mb-3 flex gap-2">
-        <input
-          v-model="newAgentUser"
-          class="w-1/2 rounded border px-2 py-1"
-          placeholder="User"
-        />
-        <input
-          v-model="newAgentIp"
-          class="w-1/2 rounded border px-2 py-1"
-          placeholder="IP"
-        />
-        <button
-          @click="addAgent"
-          class="rounded bg-gray-600 px-3 py-1 text-white"
-        >
-          Add
-        </button>
+    </template>
+    <span class="opacity-80" v-if="!fetchJob.state.value.active">
+            ⚠️ This Job is disabled
+    </span>
+    <n-divider/>
+    <!-- Job Description -->
+    <n-thing v-if="fetchJob.isReady.value">
+      <template #header>Group Description</template>
+      <div class="whitespace-pre-wrap">
+        {{ fetchJob.state.value.jobDescription }}
       </div>
-      <div class="flex flex-wrap gap-2">
-        <span
-          v-for="(agent, idx) in currentJob.targetAgents"
-          :key="agent.userName || '' + agent.ip || '' + idx"
-          class="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-sm text-gray-800"
-        >
-          {{ agent.userName }}@{{ agent.ip }}
-          <button
-            @click.stop="removeAgent(idx)"
-            class="text-xs text-red-500 hover:text-red-700"
-          >
-            ×
-          </button>
-        </span>
-      </div>
+    </n-thing>
+    <n-skeleton v-else text />
+    <n-divider />
 
-      <label class="block">Period</label>
-      <input
-        :disabled="isReadMode"
-        v-model="currentJob.period"
-        class="input-field"
+    <!-- Job Type -->
+    <n-thing v-if="fetchJob.isReady.value">
+      <template #header>Group Description</template>
+      {{ fetchJob.state.value.jobType }}
+    </n-thing>
+    <n-skeleton v-else />
+    <n-divider />
+
+    <!-- Agents -->
+    <n-thing v-if="fetchJob.isReady.value">
+      <template #header>Target Agents</template>
+      <n-data-table
+        :columns="[
+            jobColumn.agentGroup(),
+            jobColumn.ip(),
+            jobColumn.userName(),
+          ]"
+        :data="fetchJob.state.value.targetAgents"
       />
+    </n-thing>
+    <n-skeleton v-else />
+    <n-divider />
 
-      <label class="block">Script</label>
-      <textarea
-        :disabled="isReadMode"
-        v-model="currentJob.script"
-        class="input-field h-24"
-      ></textarea>
-    </div>
+    <!-- Period -->
+    <n-thing v-if="fetchJob.isReady.value">
+      <template #header>Scheduled Period</template>
+      {{ fetchJob.state.value.period }}
+    </n-thing>
+    <n-skeleton v-else />
+    <n-divider />
 
-    <div class="mt-4 flex justify-end space-x-2">
-      <button v-if="!isReadMode" @click="pressCancel" class="btn-secondary">
-        Cancel
-      </button>
-      <button v-if="!isReadMode" @click="pressSave" class="btn-primary">
-        Save
-      </button>
-    </div>
+    <n-thing v-if="fetchJob.isReady.value">
+      <template #header>Script</template>
+      <n-card>
+        <n-code  :code="fetchJob.state.value.script" language="bash" />
 
-    <ConfirmDialog ref="saveDialog" message="Save?" />
-    <ConfirmDialog ref="deleteDialog" message="Are you sure to Delete?" />
-  </div>
+      </n-card>
+    </n-thing>
+    <n-skeleton v-else />
+
+  </n-card>
+  <job-detail-edit
+    v-else
+    :job="fetchJob.state.value"
+    :form-mode="formMode"
+    @cancel="cancel"
+    @save="save"
+  />
 </template>
-
-<style scoped></style>

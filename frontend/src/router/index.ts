@@ -17,6 +17,36 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/agentGroups',
+      name: 'agentGroupList',
+      component: AgentGroupListView,
+      props: true,
+      meta: {
+        breadcrumb: (_: RouteLocationNormalizedLoadedGeneric) => 'Agent Group',
+      },
+    },
+    {
+      path: '/agentGroups/:agentGroupId',
+      name: 'agentGroupDetail',
+      component: AgentGroupDetailView,
+      props: true,
+      meta: {
+        breadcrumb: (route: RouteLocationNormalizedLoadedGeneric) =>
+          route.params.agentGroupId,
+        parent: 'agentGroupList',
+      },
+    },
+    {
+      path: '/agents/:ip/:userName',
+      name: 'agentDetail',
+      component: AgentDetailView,
+      props: true,
+      meta: {
+        breadcrumb: (route: RouteLocationNormalizedLoadedGeneric) =>
+          `Agent - ${route.params.ip} (${route.params.userName})`,
+      },
+    },
+    {
       path: '/jobs',
       name: 'jobList',
       component: JobListView,
@@ -50,36 +80,6 @@ const router = createRouter({
       name: 'jobHistoryDetail',
       component: JobHistoryDetailView,
       props: true,
-    },
-    {
-      path: '/agentGroups',
-      name: 'agentGroupList',
-      component: AgentGroupListView,
-      props: true,
-      meta: {
-        breadcrumb: (_: RouteLocationNormalizedLoadedGeneric) => 'Agent Group',
-      },
-    },
-    {
-      path: '/agentGroups/:agentGroupId',
-      name: 'agentGroupDetail',
-      component: AgentGroupDetailView,
-      props: true,
-      meta: {
-        breadcrumb: (route: RouteLocationNormalizedLoadedGeneric) =>
-          route.params.agentGroupId,
-        parent: 'agentGroupList',
-      },
-    },
-    {
-      path: '/agents/:ip/:userName',
-      name: 'agentDetail',
-      component: AgentDetailView,
-      props: true,
-      meta: {
-        breadcrumb: (route: RouteLocationNormalizedLoadedGeneric) =>
-          `Agent - ${route.params.ip} (${route.params.userName})`,
-      },
     },
   ],
 })

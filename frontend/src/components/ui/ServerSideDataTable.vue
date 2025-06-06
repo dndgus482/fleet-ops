@@ -5,6 +5,7 @@ import type {
   TableColumns,
   CreateRowProps,
 } from 'naive-ui/es/data-table/src/interface'
+import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 
 type NonEmptyArray<T> = [T, ...T[]]
 
@@ -14,6 +15,10 @@ const { searchableKeys, columns, rowProps, data } = defineProps<{
   columns: TableColumns<any>
   rowProps: CreateRowProps<any>
   data: RowData[]
+}>()
+
+const emit = defineEmits<{
+  (e: 'search', searchKey: string, searchValue: string): void
 }>()
 
 const selectedType = ref(searchableKeys[0])
@@ -26,14 +31,11 @@ const searchableTypes = computed(() => {
   }))
 })
 
-const searchResult = computed(() => {
-  const keyword = searchInput.value.trim().toLowerCase()
+const search = async () => {
+  emit('search', selectedType.value, searchInput.value)
+}
 
-  return data.filter((row) => {
-    const value = (row[selectedType.value] || '').toString().trim()
-    return value.toLowerCase().includes(keyword)
-  })
-})
+
 </script>
 
 <template>
@@ -45,11 +47,12 @@ const searchResult = computed(() => {
     >
     </n-select>
     <n-input v-model:value="searchInput" clearable />
+    <base-icon-button icon="lucide-search" @click="search" />
   </div>
   <n-data-table
     ref="table"
     :columns="columns"
-    :data="searchResult"
+    :data="data"
     :row-props="rowProps"
   />
 </template>

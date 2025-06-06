@@ -21,6 +21,7 @@
     "@tailwindcss/vite": "^4.1.8",
     "@vee-validate/zod": "^4.15.0",
     "@vueuse/core": "^13.3.0",
+    "@zodios/core": "^10.9.6",
     "axios": "^1.9.0",
     "highlight.js": "^11.11.1",
     "pinia": "^3.0.2",
@@ -51,6 +52,7 @@
     "eslint-plugin-vue": "~10.1.0",
     "jsdom": "^26.1.0",
     "naive-ui": "^2.41.0",
+    "openapi-zod-client": "^1.18.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.12",
     "tailwindcss": "^4.1.8",
@@ -61,5 +63,5 @@
     "vitest": "^3.2.0",
     "vue-tsc": "^2.2.10"
   },
-  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
+  "packageManager": "pnpm@10.11.1+sha512.e519b9f7639869dc8d5c3c5dfef73b3f091094b0a006d7317353c72b124e80e1afd429732e28705ad6bfa1ee879c1fce46c128ccebd3192101f43dd67c667912"
 }
