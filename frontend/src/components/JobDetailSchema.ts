@@ -1,14 +1,11 @@
-import { computed, h, watch } from 'vue'
-import { agentGroupApi } from '@/api/api.ts'
-import type { Agent } from '@/types/agentGroup.ts'
-import z from 'zod'
-import { toTypedSchema } from '@vee-validate/zod'
+import { computed, h } from 'vue'
 import { useDebounceField } from '@/composables/useDebounceField'
-import { useControlledField } from '@/composables/useControlledField'
-import { useValidation } from '@/composables/useValidation'
 import { useForm } from 'vee-validate'
 import BaseIconButton from '@/components/ui/BaseIconButton.vue'
-import { NTag } from 'naive-ui'
+import { schemas } from '@/api/validations.ts'
+import type { TargetAgent } from '@/types/job.ts'
+import { useControlledField } from '@/composables/useControlledField.ts'
+import { toTypedSchema } from '@vee-validate/zod'
 
 /**
  * Requirements
@@ -60,6 +57,181 @@ import { NTag } from 'naive-ui'
  * All error messages are cleared on user input to reduce friction
  * Save validates all fields; if any are invalid, feedback is shown
  */
+
+export function useJobForm() {
+  const { validateField, meta } = useForm({
+    validationSchema: toTypedSchema(schemas.SaveJobReq.merge(schemas.TargetAgentReq)),
+    initialValues: {
+      jobName: '',
+      jobDescription: '',
+      jobType: 'SSH',
+      active: true,
+      targetAgents: [],
+      agentGroupId: '',
+      targetAgentType: 'AGENT',
+      ip: '',
+      userName: '',
+      period: undefined,
+      script: undefined,
+    },
+  })
+
+  async function validateForm(): Promise<boolean> {
+    return (
+      await Promise.all([
+        validateField('jobName'),
+        validateField('jobDescription'),
+        validateField('jobType'),
+        validateField('active'),
+        validateField('targetAgents'),
+        validateField('period'),
+        validateField('script'),
+      ])
+    ).every((v) => v.valid)
+  }
+
+  return { validateForm, meta }
+}
+
+export function useJobNameField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<string>('jobName')
+  return { input, inputError, validateInput }
+}
+
+export function useJobDescriptionField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<string>('jobDescription')
+  return { input, inputError, validateInput }
+}
+
+export function useJobTypeField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<string>('jobType')
+  const types = ['SSH'] as const
+  return { input, inputError, validateInput, types }
+}
+
+export function useActiveField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<boolean>('active')
+  return { input, inputError, validateInput }
+}
+
+export function useTargetAgentField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+} = useControlledField<TargetAgent[]>('targetAgents')
+
+  const targetAgentTypeField = useTargetAgentTypeField()
+  const ipField = useIpField()
+  const userNameField = useUserNameField()
+  const agentGroupIdField = useAgentGroupIdField()
+
+  const add = () => {
+    input.value.push({
+      targetAgentType: targetAgentTypeField.input.value,
+      agentGroupId: agentGroupIdField.input.value,
+      ip: ipField.input.value,
+      userName: userNameField.input.value,
+    })
+    ipField.input.value = ''
+    userNameField.input.value = ''
+  }
+
+  const remove = (index: number) => {
+    input.value.splice(index, 1)
+  }
+
+  const error = computed(() => {
+    return inputError.value ?? ipField.inputError.value ?? userNameField.inputError.value
+  })
+
+  return {
+    input,
+    inputError,
+    validateInput,
+    add,
+    remove,
+    error,
+    targetAgentTypeField,
+    ipField,
+    userNameField,
+    agentGroupIdField,
+  }
+}
+
+function useTargetAgentTypeField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<'AGENT' | 'GROUP'>('targetAgentType')
+  const types = ['AGENT', 'GROUP'].map(it => ({
+    label: it,
+    value: it,
+  }))
+  return { input, inputError, validateInput, types }
+}
+
+function useIpField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<string>('ip')
+  return { input, inputError, validateInput }
+}
+
+function useUserNameField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<string>('userName')
+  return { input, inputError, validateInput }
+}
+
+function useAgentGroupIdField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<string>('agentGroupId')
+  return { input, inputError, validateInput }
+}
+
+export function usePeriodField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<string | undefined>('period')
+  return { input, inputError, validateInput }
+}
+
+export function useScriptField() {
+  const {
+    value: input,
+    errorMessage: inputError,
+    validate: validateInput,
+  } = useDebounceField<string | undefined>('script')
+  return { input, inputError, validateInput }
+}
 
 // ✅ ui
 

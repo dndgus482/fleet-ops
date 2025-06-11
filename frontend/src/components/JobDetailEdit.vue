@@ -1,24 +1,24 @@
 <script setup lang="ts">
 import { FormMode } from '@/composables/useFormMode'
-import { type AgentGroup, defaultAgentGroup } from '@/types/agentGroup.ts'
-import { getHashColor } from '@/util/hashColors.ts'
-import { NButton, NTag, useDialog } from 'naive-ui'
-import { agentGroupApi } from '@/api/api.ts'
+import { NButton, useDialog } from 'naive-ui'
+import { jobApi } from '@/api/api.ts'
 import { dialogOptions } from '@/components/ui/dialogOptions.ts'
-import {
-  agentColumn,
-  testAllConnections,
-  useAgentField,
-  useAgentGroupDescriptionField,
-  useAgentGroupForm,
-  useAgentGroupNameField,
-  useTagField,
-} from '@/components/AgentGroupDetailSchema.ts'
-import type { SaveAgentGroupReq } from '@generated/api.ts'
 import { useAsyncFn } from '@/composables/useAsyncFn.ts'
 import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 import { watchEffect } from 'vue'
 import { defaultJob, type Job } from '@/types/job.ts'
+import {
+  jobColumn,
+  useActiveField,
+  useJobDescriptionField,
+  useJobForm,
+  useJobNameField,
+  useJobTypeField,
+  usePeriodField,
+  useScriptField,
+  useTargetAgentField,
+} from '@/components/JobDetailSchema.ts'
+import BaseFeedback from '@/components/ui/BaseFeedback.vue'
 
 // props, emits
 const { job = defaultJob(), formMode } = defineProps<{
@@ -35,26 +35,34 @@ const emit = defineEmits<{
 const dialog = useDialog()
 
 // reactive states
-const form = useAgentGroupForm()
-const agentGroupNameField = useAgentGroupNameField()
-const agentGroupDescriptionField = useAgentGroupDescriptionField()
-const tagField = useTagField()
-const agentField = useAgentField()
+const form = useJobForm()
+const jobNameField = useJobNameField()
+const jobDescriptionField = useJobDescriptionField()
+const jobTypeField = useJobTypeField()
+const activeField = useActiveField()
+const targetAgentField = useTargetAgentField()
+const periodField = usePeriodField()
+const scriptField = useScriptField()
 
 // core functions
-const loadField = (agentGroup: AgentGroup) => {
-  agentGroupNameField.input.value = agentGroup.agentGroupName
-  agentGroupDescriptionField.input.value = agentGroup.agentGroupDescription
-  tagField.tags.value = agentGroup.tags
-  agentField.agents.value = agentGroup.agents
+const loadField = (job: Job) => {
+  jobNameField.input.value = job.jobName
+  jobDescriptionField.input.value = job.jobDescription
+  jobTypeField.input.value = job.jobType
+  activeField.input.value = job.active
+  targetAgentField.input.value = job.targetAgents ?? []
+  periodField.input.value = job.period
+  scriptField.input.value = job.script
 }
 
-const toPayload = (): SaveAgentGroupReq => {
+const toPayload = (): any => {
   return {
-    agentGroupName: agentGroupNameField.input.value,
-    agentGroupDescription: agentGroupDescriptionField.input.value,
-    tags: tagField.tags.value,
-    agents: agentField.agents.value,
+    jobDescription: jobNameField.input.value,
+    jobType: jobTypeField.input.value,
+    active: activeField.input.value,
+    targetAgents: targetAgentField.input.value,
+    period: periodField.input.value,
+    script: scriptField.input.value,
   }
 }
 
@@ -63,18 +71,13 @@ const pressCancel = async () => {
   emit('cancel')
 }
 
-const saveAgentGroup = useAsyncFn(async () => {
-  const {
-    data: { agentGroupId },
-  } =
+const saveJob = useAsyncFn(async () => {
+  const { jobId } =
     formMode === FormMode.UPDATE
-      ? await agentGroupApi.updateAgentGroup(
-          agentGroup.agentGroupId,
-          toPayload(),
-        )
-      : await agentGroupApi.createAgentGroup(toPayload())
+      ? (await jobApi.updateJob(job.jobId, toPayload())).data
+      : (await jobApi.createJob(toPayload())).data
 
-  emit('save', agentGroupId)
+  emit('save', jobId)
 })
 
 const pressSave = async () => {
@@ -87,13 +90,13 @@ const pressSave = async () => {
     content: 'Are you sure you want to save?',
     negativeText: 'Cancel',
     positiveText: 'Save',
-    onPositiveClick: () => saveAgentGroup.execute(),
+    onPositiveClick: () => saveJob.execute(),
   })
 }
 
 // side effects
 watchEffect(() => {
-  loadField(agentGroup)
+  loadField(job)
 })
 </script>
 
@@ -102,129 +105,147 @@ watchEffect(() => {
     <n-form>
       <n-form-item
         label="Name"
-        :feedback="agentGroupNameField.inputError.value"
-        :validation-status="
-          agentGroupNameField.inputError.value ? 'error' : undefined
-        "
+        :feedback="jobNameField.inputError.value"
+        :validation-status="jobNameField.inputError.value ? 'error' : undefined"
+        required
       >
         <n-input
-          v-model:value="agentGroupNameField.input.value"
+          v-model:value="jobNameField.input.value"
           show-count
-          data-testid="agentGroupNameInput"
+          data-testid="jobNameInput"
         />
       </n-form-item>
       <n-divider />
       <n-form-item
         label="Description"
-        :feedback="agentGroupDescriptionField.inputError.value"
+        :feedback="jobDescriptionField.inputError.value"
         :validation-status="
-          agentGroupDescriptionField.inputError.value ? 'error' : undefined
+          jobDescriptionField.inputError.value ? 'error' : undefined
         "
       >
         <n-input
           type="textarea"
-          v-model:value="agentGroupDescriptionField.input.value"
+          v-model:value="jobDescriptionField.input.value"
           show-count
-          data-testid="agentGroupDescriptionInput"
+          data-testid="jobDescriptionInput"
+        />
+      </n-form-item>
+      <n-divider />
+      <div class="flex flex-col">
+        <n-form-item
+          label="Tags"
+        />
+        <div class="flex items-center gap-2">
+          <n-select
+            v-model:value="targetAgentField.targetAgentTypeField.input.value"
+            :options="targetAgentField.targetAgentTypeField.types"
+            data-testid="targetAgentTypeInput"
+          />
+          <n-form-item
+            v-if="
+                targetAgentField.targetAgentTypeField.input.value === 'GROUP'
+              "
+            :feedback="targetAgentField.error.value"
+            :validation-status="
+                targetAgentField.error.value ? 'error' : undefined
+              "
+          >
+            <n-input
+              v-model:value="targetAgentField.agentGroupIdField.input.value"
+              placeholder="Agent Group Id"
+              :status="
+                  targetAgentField.agentGroupIdField.inputError.value
+                    ? 'error'
+                    : undefined
+                "
+              show-count
+              data-testid="agentGroupIdInput"
+            />
+          </n-form-item>
+          <template v-else>
+            <n-form-item
+              :feedback="targetAgentField.error.value"
+              :validation-status="
+                  targetAgentField.error.value ? 'error' : undefined
+                "
+            >
+              <n-input
+                v-model:value="targetAgentField.ipField.input.value"
+                placeholder="IP"
+                :status="
+                    targetAgentField.ipField.inputError.value
+                      ? 'error'
+                      : undefined
+                  "
+                show-count
+                data-testid="ipInput"
+              />
+            </n-form-item>
+            <n-form-item
+              :feedback="targetAgentField.error.value"
+              :validation-status="
+                  targetAgentField.error.value ? 'error' : undefined
+                "
+            >
+              <n-input
+                v-model:value="targetAgentField.userNameField.input.value"
+                placeholder="UserName"
+                :status="
+                  targetAgentField.userNameField.inputError.value
+                    ? 'error'
+                    : undefined
+                "
+                show-count
+                data-testid="userNameInput"
+              />
+            </n-form-item>
+          </template>
+          <base-icon-button
+            @click="targetAgentField.add"
+            type="primary"
+            icon="lucide:plus"
+          >
+            Add
+          </base-icon-button>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <n-data-table
+          :columns="[
+            jobColumn.agentGroup(),
+            jobColumn.ip(),
+            jobColumn.userName(),
+            jobColumn.remove(targetAgentField.remove),
+          ]"
+          :data="targetAgentField.input.value"
+        />
+      </div>
+      <n-divider />
+      <n-form-item
+        label="Schedule Period"
+        :feedback="periodField.inputError.value"
+        :validation-status="periodField.inputError.value ? 'error' : undefined"
+      >
+        <n-input
+          type="textarea"
+          v-model:value="periodField.input.value"
+          show-count
+          data-testid="periodInput"
         />
       </n-form-item>
       <n-divider />
       <n-form-item
-        label="Tags"
-        :feedback="tagField.errorMessage.value"
-        :validation-status="tagField.errorMessage.value ? 'error' : undefined"
+        label="Script"
+        :feedback="scriptField.inputError.value"
+        :validation-status="scriptField.inputError.value ? 'error' : undefined"
       >
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center gap-2">
-            <n-input
-              v-model:value="tagField.input.value"
-              placeholder="Add tag"
-              show-count
-              data-testid="tagInput"
-            />
-            <base-icon-button
-              @click="tagField.add"
-              type="primary"
-              :disabled="!tagField.isAddButtonEnabled.value"
-              icon="lucide:plus"
-            >
-              Add
-            </base-icon-button>
-          </div>
-          <div class="flex items-center gap-2">
-            <n-tag
-              v-for="(tag, index) in tagField.tags.value"
-              :key="tag + index"
-              :bordered="false"
-              :color="{ color: getHashColor(tag) }"
-              type="default"
-              closable
-              @close="tagField.remove(index)"
-            >
-              {{ tag }}
-            </n-tag>
-          </div>
-        </div>
-      </n-form-item>
-      <n-divider />
-      <div class="flex flex-col gap-2">
-        <n-form-item
-          label="Agents"
-          :feedback="agentField.errorMessage.value"
-          :validation-status="
-            agentField.errorMessage.value ? 'error' : undefined
-          "
-        >
-          <div class="flex items-center gap-2">
-            <n-input
-              v-model:value="agentField.ipInput.value"
-              placeholder="IP"
-              :status="agentField.ipInputError.value ? 'error' : undefined"
-              show-count
-              data-testid="ipInput"
-            />
-            <n-input
-              v-model:value="agentField.userNameInput.value"
-              placeholder="User"
-              :status="
-                agentField.userNameInputError.value ? 'error' : undefined
-              "
-              show-count
-              data-testid="userNameInput"
-            />
-            <base-icon-button
-              @click="agentField.add"
-              type="primary"
-              :disabled="!agentField.isAddButtonEnabled.value"
-              icon="lucide:plus"
-            >
-              Add
-            </base-icon-button>
-          </div>
-        </n-form-item>
-      </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex justify-end gap-2">
-          <base-icon-button
-            size="small"
-            @click="testAllConnections(agentField.agents.value)"
-            class="justify-end"
-            icon="lucide:activity"
-          >
-            Connection Test
-          </base-icon-button>
-        </div>
-        <n-data-table
-          :columns="[
-            agentColumn.logColumn(),
-            agentColumn.ipColumn(),
-            agentColumn.userNameColumn(),
-            agentColumn.statusColumn(),
-            agentColumn.removeColumn(agentField.remove),
-          ]"
-          :data="agentField.agents.value"
+        <n-input
+          type="textarea"
+          v-model:value="scriptField.input.value"
+          show-count
+          data-testid="scriptInput"
         />
-      </div>
+      </n-form-item>
       <n-divider />
       <div class="flex justify-end gap-2">
         <n-button @click="pressCancel" data-testid="cancelButton">
@@ -233,7 +254,7 @@ watchEffect(() => {
         <base-icon-button
           type="primary"
           @click="pressSave"
-          :loading="form.meta.value.pending || saveAgentGroup.isLoading.value"
+          :loading="form.meta.value.pending || saveJob.isLoading.value"
           icon="lucide:save"
           data-testid="saveButton"
         >

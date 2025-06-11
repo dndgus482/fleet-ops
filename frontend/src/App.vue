@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import hljs from 'highlight.js/lib/core'
-import bash from 'highlight.js/lib/languages/bash.js'
+import bash from 'highlight.js/lib/languages/bash'
 
 hljs.registerLanguage('bash', bash)
 
