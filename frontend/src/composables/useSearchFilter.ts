@@ -44,7 +44,6 @@ export function useSearchFilter<T extends Record<string, string>>(
     searchFilter,
     async () => {
       syncQueryParams()
-      console.log('hihi')
       onChange()
     },
     { deep: true },

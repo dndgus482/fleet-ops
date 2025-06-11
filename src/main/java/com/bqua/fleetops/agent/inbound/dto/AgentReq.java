@@ -2,6 +2,7 @@ package com.bqua.fleetops.agent.inbound.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class AgentReq {
             example = "192.168.0.1"
     )
     @NotBlank(message = "ip must not be blank")
-    @Size(min = 7, max = 15, message = "ip must be between 7 and 15 characters")
+    @Pattern(regexp = "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$")
     private String ip;
 
     @Schema(description = """

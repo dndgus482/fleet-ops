@@ -59,6 +59,6 @@ public interface AgentGroupApi {
 
     @Operation(summary = "Test connection for given agents")
     @PostMapping("/agent/connectionTest")
-    List<AgentConnectionRes> agentConnectionTest(List<AgentReq> agentReqList);
+    List<AgentConnectionRes> agentConnectionTest(@RequestBody List<AgentReq> agentReqList);
 
 }

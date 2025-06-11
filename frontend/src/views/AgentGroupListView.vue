@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import AgentGroupList from '@/components/AgentGroupList.vue'
+  import AgentGroupList from '@/components/AgentGroupList.vue'
 </script>
 
 <template>
   <main>
-    <AgentGroupList/>
+    <AgentGroupList />
   </main>
 </template>

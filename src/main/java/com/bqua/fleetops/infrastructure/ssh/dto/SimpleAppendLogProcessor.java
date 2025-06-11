@@ -1,6 +1,5 @@
-package com.bqua.fleetops.infrastructure.ssh;
+package com.bqua.fleetops.infrastructure.ssh.dto;
 
-import com.bqua.fleetops.infrastructure.ssh.dto.LogCallback;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-export const formatDateTime = (dateString?: string) => {
+export const formatDateTime = (dateString?: string, timeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone) => {
   if (!dateString) return ''
 
   const date = new Date(dateString)
@@ -11,7 +11,8 @@ export const formatDateTime = (dateString?: string) => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: false
+    hour12: false,
+    timeZone
   }).format(date)
 }
 

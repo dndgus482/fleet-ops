@@ -2,6 +2,7 @@ package com.bqua.fleetops.infrastructure.ssh;
 
 import com.bqua.fleetops.common.util.HeredocEscaper;
 import com.bqua.fleetops.infrastructure.ssh.dto.LogCallback;
+import com.bqua.fleetops.infrastructure.ssh.dto.SimpleAppendLogProcessor;
 import com.bqua.fleetops.infrastructure.ssh.dto.SshConnectionTestResult;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -42,19 +41,19 @@ public class SshCommands {
     }
 
     public SshConnectionTestResult connectionTest(String ip, String userName) {
-        List<String> logCollection = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder();
         try {
-            execute(ip, userName, "echo connection-ok", null);
-            String result = String.join("", logCollection);
+            execute(ip, userName, "echo connection-ok", new SimpleAppendLogProcessor(stringBuilder));
+            String result = String.join("", stringBuilder);
 
-            if ("connection-ok".equals(result)) {
+            if ("connection-ok\n".equals(result)) {
                 return new SshConnectionTestResult(true, "");
             } else {
                 return new SshConnectionTestResult(false, "Unexpected output: " + result);
             }
         } catch (Exception e) {
             log.warn("SSH connection test failed", e);
-            return new SshConnectionTestResult(false, e.getMessage());
+            return new SshConnectionTestResult(false, e.getMessage() + '\n' + e.getCause().getMessage());
         }
     }
 

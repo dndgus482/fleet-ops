@@ -5,6 +5,7 @@ export interface AgentGroup {
   agents: Agent[]
   tags: string[]
   active: boolean
+  connected?: boolean
 }
 
 export function defaultAgentGroup(): AgentGroup {
@@ -14,13 +15,15 @@ export function defaultAgentGroup(): AgentGroup {
     agentGroupDescription: '',
     agents: [],
     tags: [],
-    active: true
+    active: true,
   }
 }
 
 export interface Agent {
   ip: string
   userName: string
+  connected?: boolean
+  log?: string
 }
 
 export interface SwitchActiveReq {
@@ -28,9 +31,8 @@ export interface SwitchActiveReq {
 }
 
 export interface AgentConnectionRes {
-  ip: string,
-  userName: string,
-  connected: boolean,
+  ip: string
+  userName: string
+  connected: boolean
   log: string
 }
-

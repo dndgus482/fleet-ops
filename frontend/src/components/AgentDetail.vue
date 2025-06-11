@@ -1,62 +1,92 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { ref, useTemplateRef } from 'vue'
-import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+import type { Agent } from '@/types/agentGroup.ts'
+import { ref, watchEffect } from 'vue'
+import { useAgentConnection } from '@/components/AgentDetailSchema.js'
+import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 
-import { type Agent } from '@/types/agentGroup.ts'
-import { agentGroupApi } from '@/api/api.ts'
+const { ip, userName } = defineProps<{
+  ip: string
+  userName: string
+}>()
 
+const fetchedAgent = ref<Agent>({
+  ip,
+  userName,
+})
+const connection = useAgentConnection(fetchedAgent.value)
 
-const route = useRoute()
-const ip = String(route.params.ip)
-const userName = String(route.params.userName)
+const toggleErrorLog = ref<'errorLog' | ''>('errorLog')
 
-const agentConnectionDialog = useTemplateRef('agentConnectionDialog')
-
-const currentAgent = ref<Agent>({
-  ip: ip,
-  userName: userName,
+watchEffect(() => {
+  if (!connection.isLoading.value && connection.isLogVisible.value) {
+    toggleErrorLog.value = 'errorLog'
+  }
 })
 
-async function testConnection() {
-  const agentConnectionRes = (await agentGroupApi.agentConnectionTest([currentAgent.value])).data[0]
-  if (agentConnectionRes.connected) {
-    if (!agentConnectionDialog.value) {
-      return
-    }
-    await agentConnectionDialog.value.reveal()
-  }
+const handleItemHeaderClick = () => {
+  toggleErrorLog.value = toggleErrorLog.value === 'errorLog' ? '' : 'errorLog'
 }
-
 </script>
 
 <template>
-  <div class="p-6 max-w-xl mx-auto bg-white shadow-lg rounded-xl">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-semibold">Agent</h2>
-    </div>
-
-    <div class="space-y-3">
-      <label class="block">IP</label>
-      <input :disabled="true" v-model="currentAgent.ip" class="input-field" />
-
-      <label class="block">UserName</label>
-      <input :disabled="true" v-model="currentAgent.userName" class="input-field" />
-
-      <button
-        @click="testConnection"
-        class="text-xs px-2 py-0.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-100"
+  <n-card title="Agent">
+    <div class="flex flex-col gap-2">
+      <n-descriptions
+        label-placement="left"
+        :column="1"
+        bordered
+        label-class="whitespace-nowrap w-0"
       >
-        연결 테스트
-      </button>
+        <n-descriptions-item label="IP">
+          <span data-testid="agent-ip">{{ fetchedAgent.ip }}</span>
+        </n-descriptions-item>
+        <n-descriptions-item label="User Name">
+          <span data-testid="agent-userName">{{ fetchedAgent.userName }}</span>
+        </n-descriptions-item>
+      </n-descriptions>
+
+      <div class="flex items-center gap-2">
+        <base-icon-button
+          data-testid="test-connection-btn"
+          @click="connection.execute"
+          secondary
+          type="primary"
+          :loading="connection.isLoading.value"
+          icon="lucide:activity"
+        >
+          Test Connection
+        </base-icon-button>
+
+        <span
+          v-if="connection.connected.value !== undefined"
+          :class="[
+            connection.connected.value ? 'text-green-500' : 'text-red-500',
+          ]"
+          data-testid="connection-status"
+        >
+          {{ connection.connected.value ? 'Success' : 'Failed' }}
+        </span>
+      </div>
+
+      <n-card embedded v-if="connection.isLogVisible.value">
+        <n-collapse
+          :expanded-names="toggleErrorLog"
+          @item-header-click="handleItemHeaderClick"
+        >
+          <n-collapse-item name="errorLog" data-testid="log-toggle">
+            <template #header>
+              <span class="text-red-500">Error Log</span>
+            </template>
+            <n-scrollbar v-if="connection.isLogVisible.value">
+              <n-code
+                data-testid="error-log"
+                :code="connection.log.value"
+                word-wrap
+              />
+            </n-scrollbar>
+          </n-collapse-item>
+        </n-collapse>
+      </n-card>
     </div>
-
-    <ConfirmDialog ref="agentConnectionDialog" message="Some agents not connected" />
-  </div>
+  </n-card>
 </template>
-
-<style scoped>
-.input-field {
-  @apply w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
-}
-</style>

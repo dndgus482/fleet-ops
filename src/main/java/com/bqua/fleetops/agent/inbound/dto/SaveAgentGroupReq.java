@@ -40,12 +40,10 @@ public class SaveAgentGroupReq {
     @Schema(description = """
             List of agents belonging to this group
             ⚠️ Must not be empty
-            """,
-            maxLength = 10
+            """
     )
     @Valid
-    @Size(max = 100, message = "agent list must contain at most 100 items")
-    @NotEmpty(message = "agents must be not be empty")
+    @Size(min = 1, max = 100, message = "agent list must contain at most 100 items")
     private List<AgentReq> agents;
 
     @Schema(description = """

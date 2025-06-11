@@ -24,7 +24,7 @@ export function createStompClient(options: StompClientOptions) {
     for (const [topic, cb] of listeners.entries()) {
       client.subscribe(topic, (msg: IMessage) => cb(msg.body))
     }
-    console.log('📡 STOMP connected')
+    console.debug('📡 STOMP connected')
   }
 
   client.onWebSocketClose = () => {
@@ -65,6 +65,6 @@ export function createStompClient(options: StompClientOptions) {
       client.deactivate()
       connected = false
       listeners.clear()
-    }
+    },
   }
 }

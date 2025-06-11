@@ -868,13 +868,13 @@ export const AgentGroupApiAxiosParamCreator = function (configuration?: Configur
         /**
          * 
          * @summary Test connection for given agents
-         * @param {Array<AgentReq>} agentReqList 
+         * @param {Array<AgentReq>} agentReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        agentConnectionTest: async (agentReqList: Array<AgentReq>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'agentReqList' is not null or undefined
-            assertParamExists('agentConnectionTest', 'agentReqList', agentReqList)
+        agentConnectionTest: async (agentReq: Array<AgentReq>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'agentReq' is not null or undefined
+            assertParamExists('agentConnectionTest', 'agentReq', agentReq)
             const localVarPath = `/api/agent/connectionTest`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -887,15 +887,14 @@ export const AgentGroupApiAxiosParamCreator = function (configuration?: Configur
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            if (agentReqList) {
-                localVarQueryParameter['agentReqList'] = agentReqList;
-            }
-
 
     
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(agentReq, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1236,12 +1235,12 @@ export const AgentGroupApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Test connection for given agents
-         * @param {Array<AgentReq>} agentReqList 
+         * @param {Array<AgentReq>} agentReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async agentConnectionTest(agentReqList: Array<AgentReq>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AgentConnectionRes>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.agentConnectionTest(agentReqList, options);
+        async agentConnectionTest(agentReq: Array<AgentReq>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AgentConnectionRes>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.agentConnectionTest(agentReq, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AgentGroupApi.agentConnectionTest']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -1377,12 +1376,12 @@ export const AgentGroupApiFactory = function (configuration?: Configuration, bas
         /**
          * 
          * @summary Test connection for given agents
-         * @param {Array<AgentReq>} agentReqList 
+         * @param {Array<AgentReq>} agentReq 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        agentConnectionTest(agentReqList: Array<AgentReq>, options?: RawAxiosRequestConfig): AxiosPromise<Array<AgentConnectionRes>> {
-            return localVarFp.agentConnectionTest(agentReqList, options).then((request) => request(axios, basePath));
+        agentConnectionTest(agentReq: Array<AgentReq>, options?: RawAxiosRequestConfig): AxiosPromise<Array<AgentConnectionRes>> {
+            return localVarFp.agentConnectionTest(agentReq, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -1488,13 +1487,13 @@ export class AgentGroupApi extends BaseAPI {
     /**
      * 
      * @summary Test connection for given agents
-     * @param {Array<AgentReq>} agentReqList 
+     * @param {Array<AgentReq>} agentReq 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentGroupApi
      */
-    public agentConnectionTest(agentReqList: Array<AgentReq>, options?: RawAxiosRequestConfig) {
-        return AgentGroupApiFp(this.configuration).agentConnectionTest(agentReqList, options).then((request) => request(this.axios, this.basePath));
+    public agentConnectionTest(agentReq: Array<AgentReq>, options?: RawAxiosRequestConfig) {
+        return AgentGroupApiFp(this.configuration).agentConnectionTest(agentReq, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
